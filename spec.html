@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Widforss Shorts – Feature Spec</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.65;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    font-size: 15px;
+  }
+  h1 { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+  .subtitle { color: #666; font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 12px; padding-top: 24px; border-top: 1px solid #e8e8e8; }
+  h2:first-of-type { border-top: none; padding-top: 0; }
+  h3 { font-size: 15px; font-weight: 600; margin: 20px 0 6px; }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 0 0 14px 20px; }
+  li { margin-bottom: 6px; }
+  code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 13px; font-family: 'SF Mono', 'Consolas', monospace; }
+  .note {
+    background: #f8f7f5;
+    border-left: 3px solid #d4c9a8;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 14px;
+    border-radius: 0 4px 4px 0;
+  }
+  .note strong { font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 16px; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; }
+  th { font-weight: 600; color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tag { display: inline-block; background: #eef4e8; color: #3a6b24; font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tag.future { background: #f0eefc; color: #5b4fc4; }
+  hr { border: none; border-top: 1px solid #e8e8e8; margin: 32px 0; }
+  .ref { font-size: 13px; color: #888; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>Widforss Shorts</h1>
+<p class="subtitle">Vertical video feed for widforss.se, v1, June 2025<br>
+Prototype: <code>index.html</code> in this folder &middot; Production plan: <code>PLAN.md</code></p>
+
+<h2>Background</h2>
+<p>We've been thinking about how to bring community content closer to the shopping experience on widforss.se. The idea here is a short-form vertical video feed, along the lines of what TikTok and Reels do, but living on our own site and connected to our product catalog.</p>
+<p>The goal is to strengthen social proof and eventually let customers share their own outdoor content, tied directly to products. We've put together a prototype that shows the core interactions for desktop and mobile. It's not pixel-final everywhere, and there are open questions we'd love your thoughts on as we get into the details together.</p>
+
+<h2>Desktop layout</h2>
+
+<h3>Video player</h3>
+<p>In the prototype, the video card sits centered in a dark content area below the site header. We've been working with a size of <strong>660 x 825px</strong> and a 12px border-radius, but happy to discuss if a different proportion works better in the real layout. The dark background is <code>#1D1D1D</code>. There's a subtle gradient at the bottom of the video so the progress bar stays readable.</p>
+
+<h3>Scrolling and navigation</h3>
+<p>The feed scrolls vertically with snap behavior, so each scroll gesture lands on the next (or previous) video. Mouse wheel, keyboard arrows, and clicking the thumbnail navigation on the right all work in the prototype. When a clip finishes playing, it could automatically advance to the next one. The feed loops infinitely by reshuffling clips when you reach the end, making sure the same clip never plays back to back.</p>
+
+<h3>Left side info</h3>
+<p>To the left of the video there's a small info panel, vertically centered. It shows the video title and a relative timestamp ("10 min siden"). When a video has tagged products, a product thumbnail bubble appears below the text, with a label like "Used: Crispi Summit GTX" and a "Shop here" button. Videos without tagged products just show the title and time.</p>
+
+
+<h3>Right side thumbnails</h3>
+<p>On the right side of the video there are three small video thumbnails stacked vertically, representing the previous, current, and next clips. The active one is slightly larger than the other two (scale difference of about 0.82 vs 1.0), and they transition smoothly when you scroll between videos. Clicking a thumbnail could jump to that video. There are also small up/down arrows above and below.</p>
+
+<h3>Progress bar</h3>
+<p>At the bottom of the video card. Dark track, green fill (<code>#7EB896</code>), both rounded. It's clickable so you can skip to any point in the video. The visual bar is 4px but the clickable area is taller (around 20px) for easy interaction.</p>
+
+<h3>Product drawer</h3>
+<p>When you click "Shop here", a drawer slides in from the right showing all the tagged products for that video. Each product has an image, brand, name, price, and an add-to-cart button. The video pauses while the drawer is open. It closes by clicking X, clicking the overlay, or just scrolling to a different video.</p>
+
+<h3>Mute</h3>
+<p>Videos start muted. There's a toggle in the bottom right corner (also works with the M key).</p>
+
+<h2>Mobile layout</h2>
+<p>On mobile the layout changes quite a bit. The idea is something closer to a TikTok-style full-screen experience:</p>
+<ul>
+  <li>The desktop header is replaced by a compact mobile header (hamburger | small logo | cart) with a search field below it.</li>
+  <li>The video fills the remaining viewport. No border radius, no side panels.</li>
+  <li>Navigation is swipe only (the thumbnail sidebar is hidden).</li>
+  <li>Title, timestamp, and a "Se produktene" button are overlaid on the bottom of the video, over a darkened gradient for contrast.</li>
+  <li>Instead of the product bubble, tapping "Se produktene" opens a dark drawer from the right (around 240px wide, <code>#2a2a2a</code>) with compact product cards. The video pauses while it's open.</li>
+  <li>Progress bar and mute are repositioned for thumb reach.</li>
+</ul>
+
+<div class="note">
+  <strong>Tip:</strong> The prototype has a Desktop/Mobile toggle in the top right corner so you can switch between both views.
+</div>
+
+<h2>Product tagging <span class="tag future">exploring</span></h2>
+<p>This is something we're still figuring out visually, but the concept feels important to include early. Each video can have one or more products associated with it, linked from the product catalog (Centra) via the CMS (Sanity).</p>
+<p>A few directions we've been discussing:</p>
+<ul>
+  <li><strong>Timed tags on the video</strong>. For example, when someone in the video holds up a jacket at a specific moment, a small product pill could pop up on the video for a few seconds. This would need start/end timestamps per product in the CMS. Would be great to hear if there's a clean way to model this.</li>
+  <li><strong>Shorts on product pages</strong>. If a product has been featured in a short, we could show a small "See it in action" section on the PDP. Could be a nice way to connect content and commerce both ways.</li>
+  <li><strong>Full outfit view</strong>. For videos where someone is wearing several items, it might make sense to present them as a styled look rather than individual cards. Not sure yet how this would look exactly.</li>
+</ul>
+<p>Open to suggestions on how to approach this.</p>
+
+<h2>UGC uploads <span class="tag future">phase 2</span></h2>
+<p>Down the line, it would be great if customers could upload their own clips. We're imagining something like:</p>
+<ol>
+  <li>User logs in with their customer account.</li>
+  <li>Simple upload form: pick a video, add a title, maybe select some tags or link products.</li>
+  <li>The video gets uploaded directly to the hosting service (we've been looking at Mux for this, since it has a Sanity plugin and handles large files well).</li>
+  <li>A draft entry appears in the CMS for the content team to review.</li>
+  <li>Once approved, the clip goes live in the feed.</li>
+</ol>
+<p>This is definitely a later phase, but worth keeping in mind when thinking about the CMS schema and video hosting setup.</p>
+
+<h2>Technical notes</h2>
+
+<h3>Video hosting</h3>
+<p>The prototype just uses local mp4 files. For production, <strong>Mux</strong> seems like a strong option. It has a first-party Sanity plugin, supports adaptive streaming (HLS), generates thumbnails automatically, and includes engagement analytics. Happy to discuss alternatives though.</p>
+
+<h3>Deep linking</h3>
+<p>It would be nice if each short had its own URL (something like <code>/shorts/[slug]</code>) so people can share them. With proper OG tags, shared links would show a video thumbnail and title on social platforms, which could help drive traffic back to the site.</p>
+
+<hr>
+
+<h2>Animation reference</h2>
+<p>These are the easing curves and timing values from the prototype, mostly for reference. They're tuned to feel smooth and considered, but not precious about the exact numbers if you find something that works better.</p>
+
+<h3>Easing curves</h3>
+<table>
+  <tr><th>Name</th><th>Value</th><th>Used for</th></tr>
+  <tr><td>expo-out</td><td><code>cubic-bezier(0.19, 1, 0.22, 1)</code></td><td>Text entrances, thumbnails, general settling</td></tr>
+  <tr><td>overshoot</td><td><code>cubic-bezier(0.175, 0.885, 0.32, 1.275)</code></td><td>CTA button, small UI elements</td></tr>
+  <tr><td>overshoot-strong</td><td><code>cubic-bezier(0.33, 1.42, 0.05, 0.96)</code></td><td>Product bubble entrance</td></tr>
+  <tr><td>smooth-decel</td><td><code>cubic-bezier(0.25, 0.46, 0.45, 0.94)</code></td><td>Layout shifts, spacing changes</td></tr>
+  <tr><td>ease-in-out</td><td><code>cubic-bezier(0.65, 0, 0.35, 1)</code></td><td>Container height transitions</td></tr>
+</table>
+
+<h3>Timing</h3>
+<table>
+  <tr><th>Element</th><th>Duration</th><th>Delay</th></tr>
+  <tr><td>Title</td><td>550ms</td><td>0ms</td></tr>
+  <tr><td>Timestamp</td><td>450ms</td><td>60ms</td></tr>
+  <tr><td>Product bubble</td><td>600ms</td><td>140ms</td></tr>
+  <tr><td>Product label</td><td>400ms</td><td>400ms</td></tr>
+  <tr><td>CTA button</td><td>450ms</td><td>520ms</td></tr>
+  <tr><td>Bubble container expand</td><td>650ms</td><td></td></tr>
+  <tr><td>Thumbnail scale (up)</td><td>550ms</td><td></td></tr>
+  <tr><td>Thumbnail scale (down)</td><td>500ms</td><td></td></tr>
+  <tr><td>Desktop drawer</td><td>400ms</td><td></td></tr>
+  <tr><td>Mobile drawer</td><td>500ms</td><td></td></tr>
+</table>
+
+<h3>Colors</h3>
+<table>
+  <tr><th>Element</th><th>Value</th></tr>
+  <tr><td>Content area background</td><td><code>#1D1D1D</code></td></tr>
+  <tr><td>CTA button</td><td><code>#AFCC95</code></td></tr>
+  <tr><td>Progress bar fill</td><td><code>#7EB896</code></td></tr>
+  <tr><td>Progress bar track</td><td><code>rgba(29, 27, 25, 0.9)</code></td></tr>
+  <tr><td>Product bubble bg</td><td><code>#404040</code> (or <code>#FFFFFF</code> per product)</td></tr>
+  <tr><td>Mobile drawer bg</td><td><code>#2A2A2A</code></td></tr>
+  <tr><td>Widforss green</td><td><code>#154A29</code></td></tr>
+</table>
+
+<p class="ref">Prototype and production plan are in the same folder. Open <code>index.html</code> or serve locally to try it out.</p>
+
+</body>
+</html>

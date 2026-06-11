@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Widforss Shorts</title>
+<style>
+  @font-face { font-family: 'Bagoss Extended'; src: url('fonts/BagossExtended-Light-TRIAL.otf') format('opentype'); font-weight: 300; font-display: swap; }
+  @font-face { font-family: 'Bagoss Extended'; src: url('fonts/BagossExtended-Regular-TRIAL.otf') format('opentype'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Bagoss Extended'; src: url('fonts/BagossExtended-Medium-TRIAL.ttf') format('truetype'); font-weight: 500; font-display: swap; }
+  @font-face { font-family: 'Bagoss Extended'; src: url('fonts/BagossExtended-SemiBold-TRIAL.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:       #154A29;
+    --green-cart:  #134B2B;
+    --strip:       #B9C275;
+    --search-bg:   #F4F4F4;
+    --ease-standard: cubic-bezier(0.25, 0, 0.15, 1);
+    --ease-snappy:   cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-expo-out: cubic-bezier(0.19, 1, 0.22, 1);
+    --ease-overshoot: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --ease-overshoot-strong: cubic-bezier(0.33, 1.42, 0.05, 0.96);
+    --ease-smooth-decel: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --gutter: clamp(40px, 7.6vw, 127px);
+    --content-max: 1672px;
+  }
+
+  html, body {
+    background: #ffffff;
+    color: #000;
+    font-family: 'Bagoss Extended', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* Device toggle */
+  .device-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    gap: 2px;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .device-toggle button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 7px 14px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: all 0.3s var(--ease-expo-out);
+  }
+  .device-toggle button.active {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+  }
+
+  /* Desktop frame */
+  .desktop-frame {
+    position: relative;
+    width: min(var(--content-max), calc(100vw - 80px));
+    height: calc(100vh - 80px);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+    background: #fff;
+    transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Mobile mode */
+  body.mobile-mode .desktop-frame {
+    width: 390px;
+    height: 760px;
+    max-height: calc(100vh - 60px);
+    border-radius: 40px;
+    box-shadow: 0 0 0 8px #222, 0 30px 80px rgba(0, 0, 0, 0.3);
+  }
+  body.mobile-mode .page { overflow: hidden; }
+  body.mobile-mode .site-header,
+  body.mobile-mode .nav-sep { display: none; }
+  body.mobile-mode .mobile-header { display: grid; }
+  body.mobile-mode .mobile-search { display: flex; }
+
+  /* Mobile: content area takes all remaining space */
+  body.mobile-mode .content-area {
+    flex: 1;
+    min-height: 0;
+    border-radius: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+  body.mobile-mode .shorts-feed {
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+  body.mobile-mode .video-viewport {
+    max-width: none;
+    width: 100%;
+    height: 100%;
+  }
+  body.mobile-mode .video-slide {
+    padding: 0;
+    min-height: 100%;
+    width: 100%;
+    position: relative;
+    display: block;
+  }
+  body.mobile-mode .video-card {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  body.mobile-mode .shorts-info {
+    left: 20px;
+    bottom: 80px;
+    transform: none;
+  }
+  body.mobile-mode .shorts-info-title {
+    font-size: 18px;
+    max-width: 220px;
+  }
+  body.mobile-mode .shorts-info-time {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  body.mobile-mode .product-bubble-img {
+    width: 90px;
+    height: 92px;
+    border-radius: 16px;
+    padding: 10px 18px 8px;
+  }
+  body.mobile-mode .product-bubble-label {
+    font-size: 11px;
+  }
+  /* Mobile: hide desktop product bubble, show trigger button instead */
+  body.mobile-mode .product-bubble { display: none !important; }
+  body.mobile-mode .shorts-info-cta {
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #fff;
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  body.mobile-mode .shorts-info.has-product .shorts-info-cta {
+    animation: ctaIn 0.45s var(--ease-overshoot) 0.3s forwards;
+  }
+  body.mobile-mode .shorts-info-cta:hover {
+    background: rgba(255,255,255,0.22);
+    box-shadow: none;
+  }
+
+  /* Mobile product drawer */
+  .mobile-product-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+  }
+  body.mobile-mode .mobile-product-overlay {
+    display: block;
+  }
+  .mobile-product-overlay.open {
+    pointer-events: auto;
+  }
+  .mobile-product-overlay .overlay-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-expo-out);
+    pointer-events: none;
+  }
+  .mobile-product-overlay.open .overlay-bg {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .mobile-product-drawer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 240px;
+    background: #2a2a2a;
+    transform: translateX(100%);
+    transition: transform 0.5s var(--ease-expo-out);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    gap: 16px;
+    overflow-y: auto;
+    z-index: 61;
+  }
+  .mobile-product-overlay.open .mobile-product-drawer {
+    transform: translateX(0);
+  }
+  .mobile-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mobile-drawer-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+  }
+  .mobile-drawer-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .mobile-drawer-close:hover { opacity: 1; }
+  .mobile-drawer-items {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .mobile-product-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    opacity: 0;
+    transform: scale(0.4) translateY(10px);
+  }
+  .mobile-product-overlay.open .mobile-product-card {
+    animation: bubbleIn 0.5s var(--ease-overshoot-strong) forwards;
+  }
+  .mobile-product-overlay.open .mobile-product-card:nth-child(1) { animation-delay: 0.15s; }
+  .mobile-product-overlay.open .mobile-product-card:nth-child(2) { animation-delay: 0.25s; }
+  .mobile-product-overlay.open .mobile-product-card:nth-child(3) { animation-delay: 0.35s; }
+  .mobile-product-overlay.open .mobile-product-card:nth-child(4) { animation-delay: 0.45s; }
+  .mobile-product-card-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: 14px;
+    background: #404040;
+    overflow: hidden;
+  }
+  .mobile-product-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 8px;
+  }
+  .mobile-product-card-brand {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+  .mobile-product-card-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.3;
+    margin-top: -4px;
+  }
+  .mobile-product-card-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .mobile-product-card-btn {
+    background: #AFCC95;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: 'Bagoss Extended', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s var(--ease-smooth-decel);
+  }
+  .mobile-product-card-btn:hover { background: #c2daad; }
+
+  /* Mobile: hide sidebar */
+  body.mobile-mode .shorts-sidebar { display: none; }
+  body.mobile-mode .shorts-mute {
+    right: 16px;
+    bottom: 70px;
+  }
+
+  /* Mobile: progress bar */
+  body.mobile-mode .video-progress {
+    left: 16px;
+    right: 16px;
+    bottom: 40px;
+  }
+
+  /* Mobile: gradient covers bottom more */
+  body.mobile-mode .video-gradient {
+    background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%);
+  }
+
+  /* Mobile header (hidden by default, shown in mobile mode) */
+  .mobile-header {
+    display: none;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 18px 22px 0;
+    min-height: 46px;
+    background: #fff;
+  }
+  .mobile-header .hamburger {
+    background: none;
+    border: none;
+    padding: 8px 0;
+    cursor: pointer;
+    justify-self: start;
+  }
+  .mobile-header .logo-link img {
+    width: 108px;
+    height: 27px;
+  }
+  .mobile-header .cart-btn {
+    background: none;
+    border: none;
+    padding: 6px 0;
+    cursor: pointer;
+    justify-self: end;
+  }
+
+  .mobile-search {
+    display: none;
+    margin: 17px 17px 0 19px;
+    height: 42px;
+    background: #F4F4F4;
+    border-radius: 8px;
+    align-items: center;
+    padding: 0 15px 0 18px;
+    gap: 8px;
+  }
+  .mobile-search input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font: 300 14px/1 'Bagoss Extended', sans-serif;
+    color: #000;
+    outline: none;
+    letter-spacing: 0.01em;
+  }
+  .mobile-search input::placeholder { color: #000; opacity: 1; }
+  .mobile-search svg { flex-shrink: 0; width: 15px; height: 15px; }
+
+  .page {
+    background: #fff;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Utility bar */
+  .utility-bar {
+    background: var(--green);
+    height: 46px;
+    display: flex;
+    align-items: center;
+    padding-inline: var(--gutter);
+    color: #fff;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.12;
+    letter-spacing: 0.04em;
+    gap: 40px;
+  }
+  .utility-bar .right { margin-left: auto; }
+
+  /* Header */
+  .site-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 18px var(--gutter) 15px;
+  }
+  .dept-nav {
+    display: flex;
+    align-items: center;
+    justify-self: start;
+    gap: 24px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 0.8;
+    letter-spacing: 0.04em;
+  }
+  .dept-nav a {
+    padding: 6px 0;
+    transition: opacity 0.15s var(--ease-standard);
+  }
+  .dept-nav a:hover { opacity: 0.7; }
+  .dept-nav a.active {
+    background: var(--green);
+    color: #fff;
+    padding: 6px 16px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+  }
+  .logo-link { justify-self: center; line-height: 0; }
+  .site-header .logo-link img { width: 173px; height: 43px; display: block; }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-self: end;
+  }
+  .search-bar {
+    background: var(--search-bg);
+    border-radius: 8px;
+    height: 49px;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 12px;
+    width: 362px;
+  }
+  .search-bar input {
+    flex: 1; min-width: 0;
+    border: none; background: transparent;
+    font: 300 16px/1 'Bagoss Extended', sans-serif;
+    color: #000; outline: none;
+    letter-spacing: 0.02em;
+  }
+  .search-bar input::placeholder { color: #000; opacity: 1; }
+  .search-bar svg { flex-shrink: 0; }
+  .cart-area { position: relative; }
+  .cart-icon-wrap {
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 4px;
+  }
+  .cart-badge {
+    position: absolute; top: -4px; right: -6px;
+    width: 18px; height: 18px;
+    background: var(--green-cart);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 50%;
+    display: grid; place-items: center;
+  }
+
+  /* Nav separator */
+  .nav-sep { height: 1px; background: #e1e1e1; }
+
+  /* Sub-nav */
+  .sub-nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px var(--gutter) 15px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 0.8;
+    letter-spacing: 0.04em;
+  }
+  .sub-nav nav { display: flex; gap: 32px; }
+  .sub-nav a {
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.15s var(--ease-standard);
+  }
+  .sub-nav a:hover { border-bottom-color: rgba(0,0,0,0.3); }
+
+  /* Content area */
+  .content-area {
+    background: #1D1D1D;
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Shorts feed layout */
+  .shorts-feed {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Video viewport — the scrollable snap container */
+  .video-viewport {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .video-viewport::-webkit-scrollbar { display: none; }
+
+  /* Each video slide */
+  .video-slide {
+    position: relative;
+    width: 100%;
+    min-height: 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+  }
+
+  .video-card {
+    position: relative;
+    width: 660px;
+    height: 825px;
+    max-width: 100%;
+    max-height: calc(100% - 40px);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .video-card video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Gradient overlay on video */
+  .video-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.74) 100%);
+    pointer-events: none;
+    opacity: 1;
+  }
+
+  /* Captions overlay at bottom of video */
+  .video-captions {
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 0 40px;
+    pointer-events: none;
+  }
+  .video-captions p {
+    font-family: 'Bagoss Extended', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.2;
+    color: #fff;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+  }
+
+  /* Progress bar at bottom of video card */
+  .video-progress {
+    position: absolute;
+    bottom: 8px;
+    left: 24px;
+    right: 24px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .video-progress-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(29, 27, 25, 0.9);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+  .video-progress-fill {
+    height: 100%;
+    background: #7EB896;
+    border-radius: 16px 0 0 16px;
+    width: 0%;
+  }
+
+  /* ============================================
+     LEFT INFO PANEL — Motion System
+
+     Easing vocabulary (from vault/premium-motion-patterns):
+     - expo-out:          fast burst → silky decel. Entrances.
+     - overshoot:         goes past target, settles. Small UI.
+     - overshoot-strong:  dramatic past-target. Hero moments.
+     - smooth-decel:      gentle, no drama. Layout shifts.
+
+     Orchestration rules:
+     - Overlap aggressively: 80–150ms offsets
+     - Quick fades (0.1–0.2s), slow transforms (0.5–1s)
+     - Opacity leads, transform follows
+     - Each layer gets its own easing
+     ============================================ */
+
+  .shorts-info {
+    position: absolute;
+    left: 45px;
+    bottom: 50%;
+    transform: translateY(50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* GPU compositing for all animated children */
+  .shorts-info-title,
+  .shorts-info-time,
+  .product-bubble-img,
+  .product-bubble-label,
+  .shorts-info-cta {
+    will-change: transform, opacity;
+  }
+
+  /* ---- Title ---- */
+  .shorts-info-title {
+    font-family: 'Bagoss Extended', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 0.92;
+    color: #fff;
+    max-width: 200px;
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  .shorts-info.animate .shorts-info-title {
+    animation: titleIn 0.55s var(--ease-expo-out) 0s forwards;
+  }
+
+  /* ---- Timestamp ---- */
+  .shorts-info-time {
+    font-family: 'Bagoss Extended', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 26px;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .shorts-info.animate .shorts-info-time {
+    animation: timeIn 0.45s var(--ease-expo-out) 0.06s forwards;
+  }
+
+  /* ---- Product bubble container ----
+     grid-template-rows: 0fr → 1fr for smooth height. */
+  .product-bubble {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.65s cubic-bezier(0.65, 0, 0.35, 1),
+                margin-bottom 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+    margin-bottom: 0;
+  }
+  .product-bubble.visible {
+    grid-template-rows: 1fr;
+    margin-bottom: 18px;
+  }
+  .product-bubble-inner {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ---- Product thumbnail ---- */
+  .product-bubble-img {
+    width: 135px;
+    height: 138px;
+    border-radius: 23px;
+    background: #404040;
+    transition: background 0.4s var(--ease-smooth-decel);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 32px 14px;
+    opacity: 0;
+    transform: scale(0.35) translateY(16px);
+  }
+  .product-bubble.visible .product-bubble-img {
+    animation: bubbleIn 0.6s var(--ease-overshoot-strong) 0.14s forwards;
+  }
+  .product-bubble-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 20px;
+  }
+
+  /* ---- Product label ---- */
+  .product-bubble-label {
+    font-family: 'Bagoss Extended', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  .product-bubble.visible .product-bubble-label {
+    animation: labelIn 0.4s var(--ease-expo-out) 0.4s forwards;
+  }
+
+  /* ---- CTA button ---- */
+  .shorts-info-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #AFCC95;
+    color: #000;
+    font-family: 'Bagoss Extended', system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1;
+    padding: 8px 20px;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    width: fit-content;
+    opacity: 0;
+    transform: translateX(-14px) scale(0.95);
+    transition: background 0.25s var(--ease-smooth-decel),
+                box-shadow 0.25s var(--ease-smooth-decel);
+  }
+  .product-bubble.visible + .shorts-info-cta {
+    animation: ctaIn 0.45s var(--ease-overshoot) 0.52s forwards;
+  }
+  .shorts-info-cta:hover {
+    background: #c2daad;
+    box-shadow: 0 2px 12px rgba(175, 204, 149, 0.3);
+  }
+
+  /* ============================================
+     KEYFRAMES — faster, punchier
+     ============================================ */
+
+  @keyframes titleIn {
+    0%   { opacity: 0;   transform: translateY(22px); }
+    22%  { opacity: 1; }
+    100% { opacity: 1;   transform: translateY(0); }
+  }
+
+  @keyframes timeIn {
+    0%   { opacity: 0;   transform: translateY(14px); }
+    25%  { opacity: 0.8; }
+    100% { opacity: 0.8; transform: translateY(0); }
+  }
+
+  @keyframes bubbleIn {
+    0%   { opacity: 0;   transform: scale(0.35) translateY(16px); }
+    18%  { opacity: 1; }
+    100% { opacity: 1;   transform: scale(1) translateY(0); }
+  }
+
+  /* Label: horizontal slide. Short, snappy, no drama.
+     Starts as bubble hits ~70% of its animation. */
+  @keyframes labelIn {
+    0%   { opacity: 0;   transform: translateX(-18px); }
+    20%  { opacity: 0.7; }
+    100% { opacity: 0.7; transform: translateX(0); }
+  }
+
+  /* CTA: scale + slide, overshoot easing gives it a subtle bounce.
+     Last element — lands just as everything else settles. */
+  @keyframes ctaIn {
+    0%   { opacity: 0;   transform: translateX(-14px) scale(0.95); }
+    20%  { opacity: 1; }
+    100% { opacity: 1;   transform: translateX(0) scale(1); }
+  }
+
+  /* Right side controls */
+  .shorts-sidebar {
+    position: absolute;
+    right: 39px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    z-index: 10;
+  }
+
+  .shorts-nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.3s var(--ease-expo-out),
+                transform 0.3s var(--ease-expo-out);
+  }
+  .shorts-nav-btn:hover { opacity: 1; transform: scale(1.15); }
+  .shorts-nav-btn:active { transform: scale(0.9); transition-duration: 0.1s; }
+  .shorts-nav-btn svg { display: block; }
+
+  .shorts-thumbnails {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+  }
+
+  .shorts-thumb {
+    width: 92px;
+    height: 95px;
+    cursor: pointer;
+    position: relative;
+    will-change: transform, opacity;
+    opacity: 0.3;
+    transform: scale(0.82);
+    transition: opacity 0.6s var(--ease-expo-out),
+                transform 0.6s var(--ease-expo-out);
+  }
+  .shorts-thumb.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .shorts-thumb.exiting {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  .shorts-thumb canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 18px;
+  }
+  .shorts-thumb:not(.active):hover {
+    opacity: 0.5;
+    transform: scale(0.88);
+  }
+
+  /* Mute button */
+  .shorts-mute {
+    position: absolute;
+    right: 72px;
+    bottom: 43px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 10;
+    opacity: 0.8;
+    transition: opacity 0.15s var(--ease-standard);
+  }
+  .shorts-mute:hover { opacity: 1; }
+
+  /* Shop the look drawer */
+  .shop-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease-standard);
+  }
+  .shop-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .shop-drawer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 420px;
+    background: #fff;
+    z-index: 51;
+    transform: translateX(100%);
+    transition: transform 0.4s var(--ease-snappy);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .shop-overlay.open .shop-drawer {
+    transform: translateX(0);
+  }
+
+  .shop-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid #e1e1e1;
+  }
+  .shop-drawer-title {
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.01em;
+  }
+  .shop-drawer-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.5;
+    transition: opacity 0.15s;
+  }
+  .shop-drawer-close:hover { opacity: 1; }
+
+  .shop-drawer-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .shop-product {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .shop-product-img {
+    width: 100px;
+    height: 120px;
+    border-radius: 12px;
+    background: #f0f0ef;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .shop-product-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .shop-product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 4px;
+  }
+  .shop-product-brand {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #888;
+  }
+  .shop-product-name {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.3;
+    color: #000;
+  }
+  .shop-product-price {
+    font-weight: 600;
+    font-size: 15px;
+    color: #000;
+    margin-top: 4px;
+  }
+  .shop-product-btn {
+    margin-top: 8px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 0;
+    font-family: 'Bagoss Extended', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s var(--ease-standard);
+  }
+  .shop-product-btn:hover { background: #1a5c34; }
+</style>
+</head>
+<body>
+
+<div class="device-toggle">
+  <button class="active" id="toggleDesktop">Desktop</button>
+  <button id="toggleMobile">Mobile</button>
+</div>
+
+<div class="desktop-frame">
+<div class="page">
+
+  <header class="site-header">
+    <nav class="dept-nav">
+      <a href="#">Herr</a>
+      <a href="#">Dame</a>
+      <a href="#">Barn</a>
+      <a href="#">Jakt</a>
+      <a href="#">Friluftsliv</a>
+      <a href="#">Hund</a>
+    </nav>
+    <a href="#" class="logo-link" aria-label="Widforss"><img src="logo.svg" alt="Widforss"></a>
+    <div class="header-right">
+      <div class="search-bar">
+        <input type="search" placeholder="Sok etter produkter">
+        <svg width="20" height="20" viewBox="0 0 23 23" fill="none">
+          <path d="M21.2864 21.2864L15.5033 15.5033M15.5033 15.5033C17.0966 13.9101 17.9913 11.7488 17.9913 9.49564C17.9913 7.24246 17.0962 5.08156 15.503 3.48832C13.9097 1.89507 11.7488 1 9.49564 1C7.24246 1 5.08156 1.89507 3.48832 3.48832C1.89507 5.08156 1 7.24246 1 9.49564C1 11.7488 1.89507 13.9097 3.48832 15.503C5.08156 17.0962 7.24246 17.9913 9.49564 17.9913C11.7488 17.9913 13.9101 17.0966 15.5033 15.5033Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="cart-area">
+        <button class="cart-icon-wrap" aria-label="Kundvagn">
+          <svg width="22" height="20" viewBox="0 0 22 20" fill="none">
+            <path d="M21.7525 17.6914L20.3672 6.03461C20.3223 5.65476 20.139 5.3048 19.8522 5.05169C19.5654 4.79857 19.1954 4.66009 18.8129 4.66273H15.5459C15.5459 3.4261 15.0547 2.24011 14.1802 1.36568C13.3058 0.49125 12.1198 0 10.8832 0C9.64655 0 8.46057 0.49125 7.58614 1.36568C6.71171 2.24011 6.22046 3.4261 6.22046 4.66273H2.94929C2.56681 4.66009 2.19679 4.79857 1.91003 5.05169C1.62328 5.3048 1.43992 5.65476 1.39505 6.03461L0.0107364 17.6914C-0.015053 17.9097 0.00574536 18.131 0.0717586 18.3406C0.137772 18.5503 0.247499 18.7435 0.393696 18.9076C0.539894 19.0717 0.719237 19.203 0.919889 19.2927C1.12054 19.3824 1.33794 19.4285 1.55773 19.428H20.2014C20.4229 19.4286 20.642 19.3822 20.8442 19.2918C21.0464 19.2015 21.2271 19.0692 21.3743 18.9037C21.5192 18.7397 21.6277 18.5469 21.6929 18.338C21.7581 18.1291 21.7784 17.9087 21.7525 17.6914Z" fill="#CCCCCB"/>
+          </svg>
+        </button>
+        <span class="cart-badge">1</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="nav-sep"></div>
+
+  <!-- Mobile header -->
+  <header class="mobile-header">
+    <button class="hamburger" aria-label="Meny">
+      <svg width="19" height="7" viewBox="0 0 19 7" fill="none">
+        <rect width="18.05" height="1.07" fill="black"/>
+        <rect y="5.08" width="18.05" height="1.07" fill="black"/>
+      </svg>
+    </button>
+    <a href="#" class="logo-link" aria-label="Widforss"><img src="logo.svg" alt="Widforss"></a>
+    <button class="cart-btn" aria-label="Kundvagn">
+      <svg width="22" height="20" viewBox="0 0 22 20" fill="none">
+        <path d="M21.7525 17.6914L20.3672 6.03461C20.3223 5.65476 20.139 5.3048 19.8522 5.05169C19.5654 4.79857 19.1954 4.66009 18.8129 4.66273H15.5459C15.5459 3.4261 15.0547 2.24011 14.1802 1.36568C13.3058 0.49125 12.1198 0 10.8832 0C9.64655 0 8.46057 0.49125 7.58614 1.36568C6.71171 2.24011 6.22046 3.4261 6.22046 4.66273H2.94929C2.56681 4.66009 2.19679 4.79857 1.91003 5.05169C1.62328 5.3048 1.43992 5.65476 1.39505 6.03461L0.0107364 17.6914C-0.015053 17.9097 0.00574536 18.131 0.0717586 18.3406C0.137772 18.5503 0.247499 18.7435 0.393696 18.9076C0.539894 19.0717 0.719237 19.203 0.919889 19.2927C1.12054 19.3824 1.33794 19.4285 1.55773 19.428H20.2014C20.4229 19.4286 20.642 19.3822 20.8442 19.2918C21.0464 19.2015 21.2271 19.0692 21.3743 18.9037C21.5192 18.7397 21.6277 18.5469 21.6929 18.338C21.7581 18.1291 21.7784 17.9087 21.7525 17.6914Z" fill="#CCCCCB"/>
+      </svg>
+    </button>
+  </header>
+  <div class="mobile-search">
+    <input type="search" placeholder="Sok etter produkter">
+    <svg viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#000" stroke-width="1"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#000" stroke-width="1" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- sub-nav hidden on shorts page -->
+  <!--
+  <div class="sub-nav">
+    <nav>
+      <a href="#">Deals</a>
+      <a href="#">Klader</a>
+      <a href="#">Skor</a>
+      <a href="#">Kangor &amp; Stovlar</a>
+      <a href="#">Utrustning &amp; Tillbehor</a>
+      <a href="#">Ata, Dricka &amp; Forvara</a>
+    </nav>
+    <nav>
+      <a href="#">Guider</a>
+      <a href="#">Varumarken</a>
+      <a href="#">Nyheter</a>
+    </nav>
+  </div>
+  -->
+
+  <div class="content-area">
+    <div class="shorts-feed">
+
+      <!-- Left info panel -->
+      <div class="shorts-info">
+        <div class="shorts-info-title" id="shortsTitle">Hemma i naturen</div>
+        <div class="shorts-info-time" id="shortsTime">10 min siden</div>
+        <div class="product-bubble" id="productBubble">
+          <div class="product-bubble-inner">
+            <div class="product-bubble-img" id="productBubbleImg"></div>
+            <div class="product-bubble-label" id="productBubbleLabel"></div>
+          </div>
+        </div>
+        <button class="shorts-info-cta" id="shopCta">Shop here</button>
+      </div>
+
+      <!-- Center video viewport -->
+      <div class="video-viewport" id="videoViewport">
+        <!-- Slides injected by JS -->
+      </div>
+
+      <!-- Right sidebar -->
+      <div class="shorts-sidebar">
+        <button class="shorts-nav-btn" id="navUp" aria-label="Forrige">
+          <svg width="13" height="8" viewBox="0 0 13 8" fill="none"><path d="M1 7L6.5 1L12 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div class="shorts-thumbnails" id="thumbContainer">
+          <div class="shorts-thumb" id="thumb0"><canvas width="184" height="190"></canvas></div>
+          <div class="shorts-thumb" id="thumb1"><canvas width="184" height="190"></canvas></div>
+          <div class="shorts-thumb" id="thumb2"><canvas width="184" height="190"></canvas></div>
+        </div>
+
+        <button class="shorts-nav-btn" id="navDown" aria-label="Neste">
+          <svg width="13" height="8" viewBox="0 0 13 8" fill="none"><path d="M1 1L6.5 7L12 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Mute button -->
+      <button class="shorts-mute" id="muteBtn" aria-label="Lyd av/på">
+        <svg id="muteIcon" width="19" height="17" viewBox="0 0 19 17" fill="none">
+          <rect x="0" y="5" width="3" height="7" rx="0.5" fill="#fff"/>
+          <path d="M3 11.5L9 15.5V1.5L3 5.5" fill="#fff"/>
+          <path d="M12.5 4C13.8 5.5 13.8 11.5 12.5 13" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M15 2C17.5 4.5 17.5 12.5 15 15" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- Mobile product drawer -->
+      <div class="mobile-product-overlay" id="mobileProductOverlay">
+        <div class="overlay-bg" id="mobileOverlayBg"></div>
+        <div class="mobile-product-drawer">
+          <div class="mobile-drawer-header">
+            <span class="mobile-drawer-title">I denne videoen</span>
+            <button class="mobile-drawer-close" id="mobileDrawerClose">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="mobile-drawer-items" id="mobileDrawerItems"></div>
+        </div>
+      </div>
+
+      <!-- Shop the look drawer -->
+      <div class="shop-overlay" id="shopOverlay">
+        <div class="shop-drawer">
+          <div class="shop-drawer-header">
+            <span class="shop-drawer-title">Shop the look</span>
+            <button class="shop-drawer-close" id="shopClose" aria-label="Lukk">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="shop-drawer-items" id="shopItems"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function() {
+  const videos = [
+    {
+      src: 'SnapInsta.to_AQMvRqrxCp1k3C1N975d91bavqYCYKMBul9Kktj2yqpILzdCkufZH_Ks_FaeOseu6n3sbgnOE8ucXplwSB28y7v3GuKJL3mRiAfmccc.mp4',
+      title: 'Hemma i naturen',
+      time: '10 min siden',
+      products: [],
+    },
+    {
+      src: 'SnapInsta.to_AQNAA6XSsiZrXgJPMYQEaiN7rcK7bvE5r8A04hu2z5EyID9HhnVrFcC3kzs4ZTWhEhN50zNfcbYhp3ehYATYPSq9oN7ZLS7pXuvZ3b4.mp4',
+      title: 'Vintertur i fjällen',
+      time: '35 min siden',
+      products: [
+        { brand: 'Crispi', name: 'Summit GTX Jaktstvler', price: '4 299 kr', img: 'crisppi-sko.webp' },
+      ],
+    },
+    {
+      src: 'SnapInsta.to_AQOXPGgcx70qtQNQ9pjM5Hc0mL6XLphl9_5AXEXz4E7NEPraInD-vHxiaZuNC-JvvC3kzDT5_gla2Xvs9ROfXjQNs7WpQk7bypZQiJk.mp4',
+      title: 'Morgon vid sjön',
+      time: '1 tim sedan',
+      products: [
+        { brand: 'Stabilotherm', name: 'Vaffeljärn Älg', price: '399 kr', img: 'mat.webp', thumbBg: '#ffffff' },
+      ],
+    },
+    {
+      src: 'SnapInsta.to_AQP9ZDSEZS3pE4-mPx2REq79l4nIFBL9fHAd70lai536YfaIbi4wvZfw7Yi63NRpjXN9aIwYYYp_aCoZC61In5Xb6XRZxK7E2jAO-QU.mp4',
+      title: 'Jakten börjar',
+      time: '2 tim sedan',
+      products: [
+        { brand: 'Crispi', name: 'Summit GTX Jaktstövlar', price: '4 299 kr', img: 'crisppi-sko.webp' },
+        { brand: 'Härkila', name: 'Pro Hunter Leather GTX Jacket', price: '8 999 kr' },
+        { brand: 'Härkila', name: 'Pro Hunter Leather Breeks', price: '5 499 kr' },
+        { brand: 'Swarovski', name: 'EL 10x42 WB Kikare', price: '24 990 kr' },
+      ],
+    },
+    {
+      src: 'SnapInsta.to_AQPKH78_nvSITJpunsEZkA24d1cEYbtMZo0oYIZizjgG8enZBM_pxKzITXMsidQL4eWDQa0MpGGUqIE-Ihxey76GrndSuY2HXdcfIgI.mp4',
+      title: 'Tältliv',
+      time: '3 tim sedan',
+      products: [
+        { brand: 'Stabilotherm', name: 'Vaffeljärn Älg', price: '399 kr', img: 'mat.webp', thumbBg: '#ffffff' },
+      ],
+    },
+    {
+      src: 'SnapInsta.to_AQPu0MsM9SpjJjELuKtq-S9H2kJ8j-GqlNDgjrr-oTTavF-3ZjL-lPvo3PADQmqzqZwKVhO1hFWnIan3E1qis-ob0Oy3C36Q4MjCGKY.mp4',
+      title: 'Ut på tur',
+      time: '4 tim sedan',
+      products: [],
+    },
+  ];
+
+  const viewport = document.getElementById('videoViewport');
+  const thumbContainer = document.getElementById('thumbContainer');
+  const titleEl = document.getElementById('shortsTitle');
+  const timeEl = document.getElementById('shortsTime');
+  const infoPanel = document.querySelector('.shorts-info');
+  const muteBtn = document.getElementById('muteBtn');
+  const navUp = document.getElementById('navUp');
+  const navDown = document.getElementById('navDown');
+  const shopCta = document.getElementById('shopCta');
+  const shopOverlay = document.getElementById('shopOverlay');
+  const shopClose = document.getElementById('shopClose');
+  const shopItems = document.getElementById('shopItems');
+  const productBubble = document.getElementById('productBubble');
+  const productBubbleImg = document.getElementById('productBubbleImg');
+  const productBubbleLabel = document.getElementById('productBubbleLabel');
+
+  let currentIndex = 0;
+  let isMuted = true;
+  // Track all slides in the feed (infinite)
+  let feed = [];
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function addBatch() {
+    let batch = shuffle(videos);
+    // Never repeat the last clip from previous batch
+    const lastInFeed = feed.length > 0 ? feed[feed.length - 1].src : null;
+    if (batch[0].src === lastInFeed) {
+      // Move the duplicate away from position 0
+      const swapIdx = batch.findIndex((v, i) => i > 0 && v.src !== lastInFeed);
+      if (swapIdx > 0) [batch[0], batch[swapIdx]] = [batch[swapIdx], batch[0]];
+    }
+    // Also prevent any back-to-back duplicates within the batch
+    for (let i = 1; i < batch.length; i++) {
+      if (batch[i].src === batch[i - 1].src) {
+        const swapIdx = batch.findIndex((v, j) => j > i && v.src !== batch[i - 1].src);
+        if (swapIdx > 0) [batch[i], batch[swapIdx]] = [batch[swapIdx], batch[i]];
+      }
+    }
+    batch.forEach(v => {
+      const idx = feed.length;
+      feed.push(v);
+      const slide = document.createElement('div');
+      slide.className = 'video-slide';
+      slide.innerHTML = `
+        <div class="video-card">
+          <video src="${v.src}" muted playsinline preload="${idx < 2 ? 'auto' : 'metadata'}"></video>
+          <div class="video-gradient"></div>
+          <div class="video-progress"><div class="video-progress-track"><div class="video-progress-fill"></div></div></div>
+        </div>
+      `;
+      viewport.appendChild(slide);
+      observer.observe(slide);
+
+      // Auto-advance when video ends
+      const vid = slide.querySelector('video');
+      vid.addEventListener('ended', () => {
+        goToSlide(idx + 1);
+      });
+    });
+  }
+
+  // Persistent thumbnail slots with canvas
+  const thumbSlots = [
+    document.getElementById('thumb0'),
+    document.getElementById('thumb1'),
+    document.getElementById('thumb2'),
+  ];
+  const thumbSrcs = ['', '', ''];
+
+  // Frame cache: src → ImageBitmap (captured once, reused forever)
+  const frameCache = new Map();
+  const framePending = new Set();
+
+  function captureFrame(src) {
+    if (frameCache.has(src) || framePending.has(src)) return;
+    framePending.add(src);
+    const v = document.createElement('video');
+    v.muted = true;
+    v.preload = 'auto';
+    v.crossOrigin = 'anonymous';
+    v.src = src;
+    v.addEventListener('loadeddata', () => {
+      v.currentTime = 1;
+    }, { once: true });
+    v.addEventListener('seeked', () => {
+      createImageBitmap(v, { resizeWidth: 184, resizeHeight: 190 }).then(bmp => {
+        frameCache.set(src, bmp);
+        framePending.delete(src);
+        v.src = ''; // release
+        // Repaint any thumbs waiting for this frame
+        paintThumbs();
+      }).catch(() => { framePending.delete(src); });
+    }, { once: true });
+  }
+
+  function paintThumbs() {
+    thumbSlots.forEach((slot, i) => {
+      const src = thumbSrcs[i];
+      if (!src) return;
+      const bmp = frameCache.get(src);
+      if (!bmp) return;
+      const canvas = slot.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    });
+  }
+
+  thumbSlots.forEach(slot => {
+    slot.addEventListener('click', () => {
+      const idx = parseInt(slot.dataset.feedIndex, 10);
+      if (!isNaN(idx)) goToSlide(idx);
+    });
+  });
+
+  // Track previous active states per slot for animation direction
+  const thumbActiveState = [false, false, false];
+
+  function updateThumbs() {
+    const indices = [];
+    for (let offset = -1; offset <= 1; offset++) {
+      const idx = currentIndex + offset;
+      if (idx >= 0 && idx < feed.length) indices.push(idx);
+      else indices.push(null);
+    }
+
+    indices.forEach((feedIdx, i) => {
+      const slot = thumbSlots[i];
+      if (feedIdx === null) {
+        slot.dataset.feedIndex = '';
+        animateThumb(slot, i, false);
+        return;
+      }
+
+      const src = feed[feedIdx].src;
+      slot.dataset.feedIndex = feedIdx;
+
+      if (thumbSrcs[i] !== src) {
+        thumbSrcs[i] = src;
+        captureFrame(src);
+        const bmp = frameCache.get(src);
+        if (bmp) {
+          const canvas = slot.querySelector('canvas');
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      const isActive = feedIdx === currentIndex;
+      animateThumb(slot, i, isActive);
+    });
+  }
+
+  function animateThumb(slot, slotIdx, isActive) {
+    const wasActive = thumbActiveState[slotIdx];
+    thumbActiveState[slotIdx] = isActive;
+
+    // Cancel any running animation
+    slot.getAnimations().forEach(a => a.cancel());
+
+    if (isActive && !wasActive) {
+      // Scale UP — overshoot easing
+      slot.animate([
+        { transform: 'scale(0.82)', opacity: 0.3 },
+        { transform: 'scale(1.04)', opacity: 1, offset: 0.7 },
+        { transform: 'scale(1)', opacity: 1 }
+      ], { duration: 550, easing: 'cubic-bezier(0.19, 1, 0.22, 1)', fill: 'forwards' });
+    } else if (!isActive && wasActive) {
+      // Scale DOWN — smooth decel
+      slot.animate([
+        { transform: 'scale(1)', opacity: 1 },
+        { transform: 'scale(0.82)', opacity: 0.3 }
+      ], { duration: 500, easing: 'cubic-bezier(0.19, 1, 0.22, 1)', fill: 'forwards' });
+    } else if (isActive) {
+      // Was active, still active (slot 1 always) — re-trigger a pulse
+      slot.animate([
+        { transform: 'scale(0.94)', opacity: 0.85 },
+        { transform: 'scale(1.03)', opacity: 1, offset: 0.65 },
+        { transform: 'scale(1)', opacity: 1 }
+      ], { duration: 450, easing: 'cubic-bezier(0.19, 1, 0.22, 1)', fill: 'forwards' });
+    } else {
+      // Was inactive, still inactive — subtle settle
+      slot.animate([
+        { transform: 'scale(0.75)', opacity: 0.15 },
+        { transform: 'scale(0.82)', opacity: 0.3 }
+      ], { duration: 400, easing: 'cubic-bezier(0.19, 1, 0.22, 1)', fill: 'forwards' });
+    }
+  }
+
+  // Scroll to slide
+  function goToSlide(index) {
+    // If approaching the end, add more
+    if (index >= feed.length - 2) addBatch();
+    if (index < 0 || index >= feed.length) return;
+    const slides = viewport.querySelectorAll('.video-slide');
+    slides[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // Detect which slide is visible
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+        const slides = Array.from(viewport.querySelectorAll('.video-slide'));
+        const idx = slides.indexOf(entry.target);
+        if (idx !== -1 && idx !== currentIndex) {
+          currentIndex = idx;
+          onSlideChange();
+        }
+      }
+    });
+  }, { root: viewport, threshold: [0.6] });
+
+  function onSlideChange() {
+    const v = feed[currentIndex];
+
+    // Re-trigger all info panel animations
+    infoPanel.classList.remove('animate');
+    void infoPanel.offsetWidth;
+    titleEl.textContent = v.title;
+    timeEl.textContent = v.time;
+    infoPanel.classList.add('animate');
+
+    updateThumbs();
+
+    // Product bubble + CTA
+    const hasProducts = v.products && v.products.length > 0;
+    shopOverlay.classList.remove('open');
+    document.getElementById('mobileProductOverlay')?.classList.remove('open');
+
+    if (hasProducts) {
+      infoPanel.classList.add('has-product');
+      const featured = v.products.find(p => p.img) || v.products[0];
+      productBubbleImg.style.background = featured.thumbBg || '#404040';
+      productBubbleImg.innerHTML = featured.img
+        ? `<img src="${featured.img}" alt="${featured.name}">`
+        : `<div style="width:100%;height:100%;background:rgba(255,255,255,0.06)"></div>`;
+      productBubbleLabel.textContent = 'Used: ' + featured.brand + ' ' + featured.name;
+
+      // Re-trigger animations
+      productBubble.classList.remove('visible');
+      shopCta.style.display = '';
+      // Clear inline styles so CSS animations can drive
+      shopCta.removeAttribute('style');
+      shopCta.style.display = '';
+      void productBubble.offsetWidth;
+      productBubble.classList.add('visible');
+      // Re-trigger mobile CTA animation
+      infoPanel.classList.remove('has-product');
+      void infoPanel.offsetWidth;
+      infoPanel.classList.add('has-product');
+    } else {
+      infoPanel.classList.remove('has-product');
+      productBubble.classList.remove('visible');
+      shopCta.style.display = 'none';
+    }
+
+    // Preload more when near the end
+    if (currentIndex >= feed.length - 3) addBatch();
+
+    // Play current, pause others
+    const allSlides = viewport.querySelectorAll('.video-slide');
+    allSlides.forEach((slide, i) => {
+      const vid = slide.querySelector('video');
+      if (i === currentIndex) {
+        vid.play().catch(() => {});
+        vid.muted = isMuted;
+      } else {
+        vid.pause();
+        vid.currentTime = 0;
+      }
+    });
+  }
+
+  // Click-to-seek on progress bar
+  viewport.addEventListener('click', (e) => {
+    const bar = e.target.closest('.video-progress');
+    if (!bar) return;
+    const track = bar.querySelector('.video-progress-track');
+    const rect = track.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const vid = bar.closest('.video-slide')?.querySelector('video');
+    if (vid && vid.duration) vid.currentTime = pct * vid.duration;
+  });
+
+  // Progress bar update
+  function updateProgress() {
+    const allSlides = viewport.querySelectorAll('.video-slide');
+    allSlides.forEach((slide) => {
+      const vid = slide.querySelector('video');
+      const fill = slide.querySelector('.video-progress-fill');
+      if (vid && fill && vid.duration) {
+        fill.style.width = (vid.currentTime / vid.duration) * 100 + '%';
+      }
+    });
+    requestAnimationFrame(updateProgress);
+  }
+  requestAnimationFrame(updateProgress);
+
+  // Nav buttons
+  navUp.addEventListener('click', () => goToSlide(currentIndex - 1));
+  navDown.addEventListener('click', () => goToSlide(currentIndex + 1));
+
+  // Mute toggle
+  muteBtn.addEventListener('click', () => {
+    isMuted = !isMuted;
+    const currentVid = viewport.querySelectorAll('.video-slide')[currentIndex]?.querySelector('video');
+    if (currentVid) currentVid.muted = isMuted;
+    muteBtn.style.opacity = isMuted ? '0.5' : '1';
+  });
+
+  // Shop the look drawer
+  function openShop() {
+    const v = feed[currentIndex];
+    if (!v.products || !v.products.length) return;
+    shopItems.innerHTML = v.products.map(p => `
+      <div class="shop-product">
+        <div class="shop-product-img">
+          ${p.img
+            ? `<img src="${p.img}" alt="${p.name}">`
+            : `<div style="width:100%;height:100%;background:#e8e8e6"></div>`
+          }
+        </div>
+        <div class="shop-product-info">
+          <span class="shop-product-brand">${p.brand}</span>
+          <span class="shop-product-name">${p.name}</span>
+          <span class="shop-product-price">${p.price}</span>
+          <button class="shop-product-btn">Legg i handlekurv</button>
+        </div>
+      </div>
+    `).join('');
+    shopOverlay.classList.add('open');
+    pauseCurrent();
+  }
+
+  function pauseCurrent() {
+    const vid = viewport.querySelectorAll('.video-slide')[currentIndex]?.querySelector('video');
+    if (vid) vid.pause();
+  }
+  function resumeCurrent() {
+    const vid = viewport.querySelectorAll('.video-slide')[currentIndex]?.querySelector('video');
+    if (vid) vid.play().catch(() => {});
+  }
+
+  shopClose.addEventListener('click', () => { shopOverlay.classList.remove('open'); resumeCurrent(); });
+  shopOverlay.addEventListener('click', (e) => {
+    if (e.target === shopOverlay) { shopOverlay.classList.remove('open'); resumeCurrent(); }
+  });
+
+  // Forward wheel to viewport — CSS scroll-snap handles the snapping
+  document.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    viewport.scrollBy({ top: e.deltaY * 2 });
+  }, { passive: false });
+
+  // Keyboard nav
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'j') goToSlide(currentIndex + 1);
+    if (e.key === 'ArrowUp' || e.key === 'k') goToSlide(currentIndex - 1);
+    if (e.key === 'm') muteBtn.click();
+  });
+
+  // Init — first batch shuffled
+  addBatch();
+  // Pre-capture frames for all source videos
+  videos.forEach(v => captureFrame(v.src));
+  updateThumbs();
+  // Set initial state
+  const firstData = feed[0];
+  titleEl.textContent = firstData.title;
+  timeEl.textContent = firstData.time;
+  infoPanel.classList.add('animate');
+  if (firstData.products && firstData.products.length) {
+    infoPanel.classList.add('has-product');
+    const featured = firstData.products.find(p => p.img) || firstData.products[0];
+    productBubbleImg.style.background = featured.thumbBg || '#404040';
+    productBubbleImg.innerHTML = featured.img
+      ? `<img src="${featured.img}" alt="${featured.name}">`
+      : `<div style="width:100%;height:100%;background:rgba(255,255,255,0.06)"></div>`;
+    productBubbleLabel.textContent = 'Used: ' + featured.brand + ' ' + featured.name;
+    productBubble.classList.add('visible');
+    shopCta.style.display = '';
+  } else {
+    infoPanel.classList.remove('has-product');
+    productBubble.classList.remove('visible');
+    shopCta.style.display = 'none';
+  }
+  const firstVid = viewport.querySelector('.video-slide video');
+  if (firstVid) firstVid.play().catch(() => {});
+
+  // Mobile product drawer
+  const mobileOverlay = document.getElementById('mobileProductOverlay');
+  const mobileOverlayBg = document.getElementById('mobileOverlayBg');
+  const mobileDrawerClose = document.getElementById('mobileDrawerClose');
+  const mobileDrawerItems = document.getElementById('mobileDrawerItems');
+
+  function openMobileDrawer() {
+    const v = feed[currentIndex];
+    if (!v.products || !v.products.length) return;
+    mobileDrawerItems.innerHTML = v.products.map(p => `
+      <div class="mobile-product-card">
+        <div class="mobile-product-card-img" ${p.thumbBg ? `style="background:${p.thumbBg}"` : ''}>
+          ${p.img ? `<img src="${p.img}" alt="${p.name}">` : ''}
+        </div>
+        <span class="mobile-product-card-brand">${p.brand}</span>
+        <span class="mobile-product-card-name">${p.name}</span>
+        <span class="mobile-product-card-price">${p.price}</span>
+        <button class="mobile-product-card-btn">Legg i handlekurv</button>
+      </div>
+    `).join('');
+    mobileOverlay.classList.add('open');
+    pauseCurrent();
+  }
+  function closeMobileDrawer() {
+    mobileOverlay.classList.remove('open');
+    resumeCurrent();
+  }
+  mobileDrawerClose.addEventListener('click', closeMobileDrawer);
+  mobileOverlayBg.addEventListener('click', closeMobileDrawer);
+
+  // CTA opens the right drawer depending on mode
+  shopCta.addEventListener('click', () => {
+    if (document.body.classList.contains('mobile-mode')) {
+      openMobileDrawer();
+    } else {
+      openShop();
+    }
+  });
+
+  // Update CTA text based on mode
+  function updateCtaText() {
+    const isMobile = document.body.classList.contains('mobile-mode');
+    shopCta.textContent = isMobile ? 'Se produktene' : 'Shop here';
+  }
+
+  // Device toggle
+  const btnDesktop = document.getElementById('toggleDesktop');
+  const btnMobile = document.getElementById('toggleMobile');
+  btnDesktop.addEventListener('click', () => {
+    document.body.classList.remove('mobile-mode');
+    btnDesktop.classList.add('active');
+    btnMobile.classList.remove('active');
+    closeMobileDrawer();
+    updateCtaText();
+  });
+  btnMobile.addEventListener('click', () => {
+    document.body.classList.add('mobile-mode');
+    btnMobile.classList.add('active');
+    btnDesktop.classList.remove('active');
+    updateCtaText();
+  });
+})();
+</script>
+
+</body>
+</html>
