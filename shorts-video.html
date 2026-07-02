@@ -20,8 +20,10 @@
 
   .player {
     position: relative;
-    height: min(96vh, calc(96vw * (1020 / 574)));
-    aspect-ratio: 574 / 1020;
+    height: 100%;
+    max-height: 100%;
+    aspect-ratio: 574 / 1021;   /* match index-v2 .video-card ratio exactly (0.5622) — no letterbox seam when embedded */
+    max-width: 100%;
     border-radius: 12px;
     overflow: hidden;
     background: #000;
@@ -116,7 +118,6 @@
   function show(n) {
     idx = n;
     slides.forEach((s, i) => s.classList.toggle('active', i === n));
-    // caption swap
     caption.style.opacity = 0;
     caption.style.transform = 'translateY(6px)';
     setTimeout(() => {

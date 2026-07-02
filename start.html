@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Widforss Shorts — start</title>
+<style>
+  @font-face { font-family:'Greed Standard'; src:url('fonts/GreedStandardTRIAL-Regular.otf') format('opentype'); font-weight:400; font-display:swap; }
+  @font-face { font-family:'Greed Standard'; src:url('fonts/GreedStandardTRIAL-Medium.otf') format('opentype'); font-weight:500; font-display:swap; }
+
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+  :root { --nav-font:'Greed Standard','Helvetica Neue',Arial,sans-serif; }
+  html,body { height:100%; }
+  body { background:#fff; font-family:var(--nav-font); -webkit-font-smoothing:antialiased;
+    min-height:100vh; display:flex; align-items:center; }
+  a { color:inherit; text-decoration:none; }
+
+  /* Device toggle — reused from index-v2.html */
+  .device-toggle {
+    position:fixed; top:16px; right:16px; z-index:9999; display:flex; gap:2px;
+    background:rgba(0,0,0,0.65); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-radius:10px; padding:3px;
+  }
+  .device-toggle button {
+    background:none; border:none; cursor:pointer; padding:7px 14px; border-radius:8px;
+    color:rgba(255,255,255,0.45); font-size:13px; font-weight:500; letter-spacing:0.02em;
+    transition:all .3s cubic-bezier(0.16,1,0.3,1); font-family:var(--nav-font);
+  }
+  .device-toggle button.active { background:rgba(255,255,255,0.18); color:#fff; }
+
+  /* ===================== "Klipp från er" module ===================== */
+  /* max-width = exactly 4 cards + gaps + gutters (4·318 + 3·24 + 2·36 = 1416) so the row fills edge-to-edge
+     and the nav arrows (at the right gutter) line up with the last card's right edge */
+  .km-module { width:100%; max-width:1416px; margin:0 auto; padding:0 36px; }
+  /* head height == title height (arrows are absolute) so margin-bottom IS the title→thumbnail gap (48px, per handoff spec) */
+  .km-head { position:relative; display:flex; align-items:center; margin-bottom:48px; }
+  .km-title { display:flex; align-items:center; gap:14px; font-weight:500; font-size:36px; line-height:1.15; color:#000; }
+  .km-title svg { display:block; transform:translateY(0.07em); }   /* optical: centered on the word's ink, not the line box */
+  .km-nav { position:absolute; right:0; top:50%; transform:translateY(-50%); }
+
+  /* Slider arrows — dp-nav2 (joined pill, linked slide-on-hover) from Dealspage/widforss.html */
+  .dp-prevnext { display:inline-flex; width:82px; height:45px; border:1px solid rgb(0 0 0 / 20%); overflow:hidden; border-radius:6px; }
+  .dp-pn-btn { width:41px; height:100%; display:grid; place-items:center; background:#fff; border:0; padding:0; cursor:pointer; color:#000; }
+  .dp-pn-ico { display:block; pointer-events:none; transition:opacity 200ms ease, transform 200ms ease; }
+  .dp-pn-ico svg { height:16px; width:auto; display:block; }
+  .dp-pn-btn[data-dir="prev"] .dp-pn-ico { transform:rotate(180deg); }
+  .dp-prevnext.is-next-hover [data-dir="next"] .dp-pn-ico { transform:translate(-104%,0); }
+  .dp-prevnext.is-next-hover [data-dir="prev"] .dp-pn-ico { opacity:0; transform:rotate(180deg) translate(100%,0); }
+  .dp-prevnext.is-prev-hover [data-dir="prev"] .dp-pn-ico { transform:rotate(180deg) translate(-104%,0); }
+  .dp-prevnext.is-prev-hover [data-dir="next"] .dp-pn-ico { opacity:0; transform:translate(100%,0); }
+  .dp-pn-btn.is-disabled { pointer-events:none; cursor:default; }
+  .dp-pn-btn.is-disabled .dp-pn-ico { opacity:.35; }
+
+  .km-row { display:flex; gap:24px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
+    scrollbar-width:none; -ms-overflow-style:none; }
+  .km-row::-webkit-scrollbar { display:none; }
+  .km-card { position:relative; flex:0 0 318px; height:399px; border-radius:12px; overflow:hidden; display:block; background:#111; cursor:pointer; scroll-snap-align:start; }
+  .km-card img, .km-card video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .km-card video { opacity:0; transition:opacity .25s ease; }         /* poster still shows; clip fades in on hover */
+  .km-card:hover video { opacity:1; }
+  .km-card-grad { position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.92) 100%); }
+  .km-card-name { position:absolute; left:17px; right:17px; bottom:18px; font-weight:500; font-size:28px; line-height:1.12; color:#fff; }
+
+  /* ===================== Mobile module (410-wide) ===================== */
+  .km-module-m { display:none; width:410px; max-width:100%; margin:0 auto; padding:0 19px; }
+  .km-title-m { display:flex; align-items:center; gap:11px; font-weight:500; font-size:28px; line-height:1.15; color:#000; margin-bottom:23px; }
+  .km-title-m svg { display:block; transform:translateY(0.07em); }
+  .km-row-m { display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
+    scrollbar-width:none; -ms-overflow-style:none; padding-right:19px; }
+  .km-row-m::-webkit-scrollbar { display:none; }
+  .km-card-m { position:relative; flex:0 0 260px; height:324px; border-radius:12px; overflow:hidden; display:block; background:#111; scroll-snap-align:start; }
+  .km-card-m img, .km-card-m video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .km-card-grad-m { position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.92) 100%); }
+  .km-card-name-m { position:absolute; left:15px; right:15px; bottom:44px; font-weight:500; font-size:24px; line-height:1.12; color:#fff; }
+
+  body.mobile-mode .km-module { display:none; }
+  body.mobile-mode .km-module-m { display:block; }
+</style>
+</head>
+<body>
+
+<div class="device-toggle">
+  <button class="active" id="toggleDesktop">Desktop</button>
+  <button id="toggleMobile">Mobile</button>
+</div>
+
+<!-- ===== Desktop module ===== -->
+<div class="km-module">
+  <div class="km-head">
+    <h2 class="km-title">Klipp från er
+      <svg width="11" height="17" viewBox="0 0 14 21" fill="none"><path d="M13.1736 10.3018L2.87133 20.6035L0 17.7322L7.43043 10.3018L0 2.87133L2.87133 0L13.1736 10.3018Z" fill="black"/><path d="M0.0371094 20.6213H3.02458V0.0830078H0.0371094V20.6213Z" fill="black"/><path d="M9.98482 9.36655L1.89746 18.0423L2.4857 3.58301L9.98482 9.36655Z" fill="black"/></svg>
+    </h2>
+    <div class="km-nav">
+      <span class="dp-prevnext">
+        <button class="dp-pn-btn" type="button" data-dir="prev" aria-label="Föregående"><span class="dp-pn-ico"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="m7.846 2.231-.524.497c-.131.131-.131.34 0 .445l4.062 4.054H2.448a.32.32 0 0 0-.315.314v.732c0 .183.131.314.315.314h8.936l-4.062 4.08c-.131.105-.131.314 0 .445l.524.497c.105.13.314.13.445 0l5.477-5.467a.3.3 0 0 0 0-.444L8.291 2.23c-.13-.13-.34-.13-.445 0"></path></svg></span></button>
+        <button class="dp-pn-btn" type="button" data-dir="next" aria-label="Nästa"><span class="dp-pn-ico"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="m7.846 2.231-.524.497c-.131.131-.131.34 0 .445l4.062 4.054H2.448a.32.32 0 0 0-.315.314v.732c0 .183.131.314.315.314h8.936l-4.062 4.08c-.131.105-.131.314 0 .445l.524.497c.105.13.314.13.445 0l5.477-5.467a.3.3 0 0 0 0-.444L8.291 2.23c-.13-.13-.34-.13-.445 0"></path></svg></span></button>
+      </span>
+    </div>
+  </div>
+
+  <div class="km-row" id="kmRow" data-slider>
+    <a class="km-card" href="index-v2.html">
+      <img src="thumbs/vid-camp.jpg" alt="">
+      <video src="SnapInsta.to_AQMvRqrxCp1k3C1N975d91bavqYCYKMBul9Kktj2yqpILzdCkufZH_Ks_FaeOseu6n3sbgnOE8ucXplwSB28y7v3GuKJL3mRiAfmccc.mp4" muted loop playsinline preload="none"></video>
+      <div class="km-card-grad"></div>
+      <div class="km-card-name">Frukost i det fria</div>
+    </a>
+    <a class="km-card" href="index-v2.html">
+      <img src="generated/4-elgjakt.png" alt="">
+      <video src="SnapInsta.to_AQP9ZDSEZS3pE4-mPx2REq79l4nIFBL9fHAd70lai536YfaIbi4wvZfw7Yi63NRpjXN9aIwYYYp_aCoZC61In5Xb6XRZxK7E2jAO-QU.mp4" muted loop playsinline preload="none"></video>
+      <div class="km-card-grad"></div>
+      <div class="km-card-name">Jakt med hund</div>
+    </a>
+    <a class="km-card" href="index-v2.html">
+      <img src="generated/1-fjall-matpause.png" alt="">
+      <video src="SnapInsta.to_AQNAA6XSsiZrXgJPMYQEaiN7rcK7bvE5r8A04hu2z5EyID9HhnVrFcC3kzs4ZTWhEhN50zNfcbYhp3ehYATYPSq9oN7ZLS7pXuvZ3b4.mp4" muted loop playsinline preload="none"></video>
+      <div class="km-card-grad"></div>
+      <div class="km-card-name">Rast på fjället</div>
+    </a>
+    <a class="km-card" href="index-v2.html">
+      <img src="thumbs/vid-hund.jpg" alt="">
+      <video src="SnapInsta.to_AQOXPGgcx70qtQNQ9pjM5Hc0mL6XLphl9_5AXEXz4E7NEPraInD-vHxiaZuNC-JvvC3kzDT5_gla2Xvs9ROfXjQNs7WpQk7bypZQiJk.mp4" muted loop playsinline preload="none"></video>
+      <div class="km-card-grad"></div>
+      <div class="km-card-name">Höst med hunden</div>
+    </a>
+    <a class="km-card" href="index-v2.html">
+      <img src="generated/2-leirplass.png" alt="">
+      <video src="SnapInsta.to_AQPKH78_nvSITJpunsEZkA24d1cEYbtMZo0oYIZizjgG8enZBM_pxKzITXMsidQL4eWDQa0MpGGUqIE-Ihxey76GrndSuY2HXdcfIgI.mp4" muted loop playsinline preload="none"></video>
+      <div class="km-card-grad"></div>
+      <div class="km-card-name">Natt i tältet</div>
+    </a>
+    <a class="km-card" href="index-v2.html">
+      <img src="generated/5-jakt-portrett.png" alt="">
+      <video src="SnapInsta.to_AQPu0MsM9SpjJjELuKtq-S9H2kJ8j-GqlNDgjrr-oTTavF-3ZjL-lPvo3PADQmqzqZwKVhO1hFWnIan3E1qis-ob0Oy3C36Q4MjCGKY.mp4" muted loop playsinline preload="none"></video>
+      <div class="km-card-grad"></div>
+      <div class="km-card-name">Ut på jakt</div>
+    </a>
+  </div>
+</div>
+
+<!-- ===== Mobile module ===== -->
+<div class="km-module-m">
+  <h2 class="km-title-m">Klipp från er
+    <svg width="9" height="14" viewBox="0 0 14 21" fill="none"><path d="M13.1736 10.3018L2.87133 20.6035L0 17.7322L7.43043 10.3018L0 2.87133L2.87133 0L13.1736 10.3018Z" fill="black"/><path d="M0.0371094 20.6213H3.02458V0.0830078H0.0371094V20.6213Z" fill="black"/><path d="M9.98482 9.36655L1.89746 18.0423L2.4857 3.58301L9.98482 9.36655Z" fill="black"/></svg>
+  </h2>
+  <div class="km-row-m">
+    <a class="km-card-m" href="index-v2.html?view=mobile">
+      <img src="thumbs/vid-camp.jpg" alt="">
+      <div class="km-card-grad-m"></div>
+      <div class="km-card-name-m">Frukost i det fria</div>
+    </a>
+    <a class="km-card-m" href="index-v2.html?view=mobile">
+      <img src="generated/4-elgjakt.png" alt="">
+      <div class="km-card-grad-m"></div>
+      <div class="km-card-name-m">Jakt med hund</div>
+    </a>
+    <a class="km-card-m" href="index-v2.html?view=mobile">
+      <img src="generated/1-fjall-matpause.png" alt="">
+      <div class="km-card-grad-m"></div>
+      <div class="km-card-name-m">Rast på fjället</div>
+    </a>
+    <a class="km-card-m" href="index-v2.html?view=mobile">
+      <img src="thumbs/vid-hund.jpg" alt="">
+      <div class="km-card-grad-m"></div>
+      <div class="km-card-name-m">Höst med hunden</div>
+    </a>
+    <a class="km-card-m" href="index-v2.html?view=mobile">
+      <img src="generated/2-leirplass.png" alt="">
+      <div class="km-card-grad-m"></div>
+      <div class="km-card-name-m">Natt i tältet</div>
+    </a>
+    <a class="km-card-m" href="index-v2.html?view=mobile">
+      <img src="generated/5-jakt-portrett.png" alt="">
+      <div class="km-card-grad-m"></div>
+      <div class="km-card-name-m">Ut på jakt</div>
+    </a>
+  </div>
+</div>
+
+<script>
+  // Poster still by default; play the clip on hover
+  document.querySelectorAll('.km-card').forEach(card => {
+    const v = card.querySelector('video');
+    if (!v) return;
+    card.addEventListener('mouseenter', () => { v.currentTime = 0; v.play().catch(() => {}); });
+    card.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
+  });
+
+  // Slider — dp-nav2 arrows drive the desktop card track
+  (function initSlider() {
+    const nav = document.querySelector('.km-nav');
+    const track = document.querySelector('[data-slider]');
+    if (!nav || !track) return;
+    const prevnext = nav.querySelector('.dp-prevnext');
+    const prevBtn = nav.querySelector('[data-dir="prev"]');
+    const nextBtn = nav.querySelector('[data-dir="next"]');
+    nextBtn.addEventListener('mouseenter', () => prevnext.classList.add('is-next-hover'));
+    nextBtn.addEventListener('mouseleave', () => prevnext.classList.remove('is-next-hover'));
+    prevBtn.addEventListener('mouseenter', () => prevnext.classList.add('is-prev-hover'));
+    prevBtn.addEventListener('mouseleave', () => prevnext.classList.remove('is-prev-hover'));
+    const step = () => { const it = track.querySelector('.km-card'); return it ? it.getBoundingClientRect().width + 24 : track.clientWidth; };
+    function updateArrows() {
+      const max = track.scrollWidth - track.clientWidth;
+      prevBtn.classList.toggle('is-disabled', track.scrollLeft <= 1);
+      nextBtn.classList.toggle('is-disabled', track.scrollLeft >= max - 1);
+    }
+    updateArrows();
+    track.addEventListener('scroll', () => requestAnimationFrame(updateArrows));
+    window.addEventListener('resize', updateArrows);
+    prevBtn.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+    nextBtn.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+  })();
+
+  // Device toggle
+  const btnDesktop = document.getElementById('toggleDesktop');
+  const btnMobile = document.getElementById('toggleMobile');
+  btnDesktop.addEventListener('click', () => {
+    document.body.classList.remove('mobile-mode');
+    btnDesktop.classList.add('active'); btnMobile.classList.remove('active');
+  });
+  btnMobile.addEventListener('click', () => {
+    document.body.classList.add('mobile-mode');
+    btnMobile.classList.add('active'); btnDesktop.classList.remove('active');
+  });
+  if (new URLSearchParams(location.search).get('view') === 'mobile') btnMobile.click();
+</script>
+
+</body>
+</html>

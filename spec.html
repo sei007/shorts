@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Widforss Shorts – Feature Spec</title>
+<title>Widrab Shorts – Feature Spec</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -44,18 +44,17 @@
 </head>
 <body>
 
-<h1>Widforss Shorts</h1>
-<p class="subtitle">Vertical video feed for widforss.se, v1, June 2025<br>
-Prototype: <code>index.html</code> in this folder &middot; Production plan: <code>PLAN.md</code></p>
+<h1>Widrab Shorts</h1>
+<p class="subtitle"></p>
 
 <h2>Background</h2>
-<p>We've been thinking about how to bring community content closer to the shopping experience on widforss.se. The idea here is a short-form vertical video feed, along the lines of what TikTok and Reels do, but living on our own site and connected to our product catalog.</p>
+<p>We've been thinking about how to bring community content closer to the shopping experience on our sites. The idea here is a short-form vertical video feed, along the lines of what TikTok and Reels do, but living on our own site and connected to our product catalog.</p>
 <p>The goal is to strengthen social proof and eventually let customers share their own outdoor content, tied directly to products. We've put together a prototype that shows the core interactions for desktop and mobile. It's not pixel-final everywhere, and there are open questions we'd love your thoughts on as we get into the details together.</p>
 
 <h2>Desktop layout</h2>
 
 <h3>Video player</h3>
-<p>In the prototype, the video card sits centered in a dark content area below the site header. We've been working with a size of <strong>660 x 825px</strong> and a 12px border-radius, but happy to discuss if a different proportion works better in the real layout. The dark background is <code>#1D1D1D</code>. There's a subtle gradient at the bottom of the video so the progress bar stays readable.</p>
+<p>In the prototype, the video card sits centered in a dark content area below the site header. We've been working with a size of <strong>660 x 825px</strong> and a 12px border-radius. The dark background is <code>#1D1D1D</code>. There's a subtle gradient at the bottom of the video so the progress bar stays readable.</p>
 
 <h3>Scrolling and navigation</h3>
 <p>The feed scrolls vertically with snap behavior, so each scroll gesture lands on the next (or previous) video. Mouse wheel, keyboard arrows, and clicking the thumbnail navigation on the right all work in the prototype. When a clip finishes playing, it could automatically advance to the next one. The feed loops infinitely by reshuffling clips when you reach the end, making sure the same clip never plays back to back.</p>
@@ -79,19 +78,15 @@ Prototype: <code>index.html</code> in this folder &middot; Production plan: <cod
 <h2>Mobile layout</h2>
 <p>On mobile the layout changes quite a bit. The idea is something closer to a TikTok-style full-screen experience:</p>
 <ul>
-  <li>The desktop header is replaced by a compact mobile header (hamburger | small logo | cart) with a search field below it.</li>
-  <li>The video fills the remaining viewport. No border radius, no side panels.</li>
+<li>The video fills the remaining viewport. No border radius, no side panels.</li>
   <li>Navigation is swipe only (the thumbnail sidebar is hidden).</li>
   <li>Title, timestamp, and a "Se produktene" button are overlaid on the bottom of the video, over a darkened gradient for contrast.</li>
   <li>Instead of the product bubble, tapping "Se produktene" opens a dark drawer from the right (around 240px wide, <code>#2a2a2a</code>) with compact product cards. The video pauses while it's open.</li>
   <li>Progress bar and mute are repositioned for thumb reach.</li>
 </ul>
 
-<div class="note">
-  <strong>Tip:</strong> The prototype has a Desktop/Mobile toggle in the top right corner so you can switch between both views.
-</div>
 
-<h2>Product tagging <span class="tag future">exploring</span></h2>
+<h2>Product tagging</h2>
 <p>This is something we're still figuring out visually, but the concept feels important to include early. Each video can have one or more products associated with it, linked from the product catalog (Centra) via the CMS (Sanity).</p>
 <p>A few directions we've been discussing:</p>
 <ul>
@@ -101,7 +96,7 @@ Prototype: <code>index.html</code> in this folder &middot; Production plan: <cod
 </ul>
 <p>Open to suggestions on how to approach this.</p>
 
-<h2>UGC uploads <span class="tag future">phase 2</span></h2>
+<h2>UGC uploads</h2>
 <p>Down the line, it would be great if customers could upload their own clips. We're imagining something like:</p>
 <ol>
   <li>User logs in with their customer account.</li>
@@ -110,12 +105,11 @@ Prototype: <code>index.html</code> in this folder &middot; Production plan: <cod
   <li>A draft entry appears in the CMS for the content team to review.</li>
   <li>Once approved, the clip goes live in the feed.</li>
 </ol>
-<p>This is definitely a later phase, but worth keeping in mind when thinking about the CMS schema and video hosting setup.</p>
 
 <h2>Technical notes</h2>
 
 <h3>Video hosting</h3>
-<p>The prototype just uses local mp4 files. For production, <strong>Mux</strong> seems like a strong option. It has a first-party Sanity plugin, supports adaptive streaming (HLS), generates thumbnails automatically, and includes engagement analytics. Happy to discuss alternatives though.</p>
+<p>The prototype just uses local mp4 files. For production, <strong>Mux</strong> seems like a strong option. It has a first-party Sanity plugin, supports adaptive streaming (HLS), generates thumbnails automatically, and includes engagement analytics.</p>
 
 <h3>Deep linking</h3>
 <p>It would be nice if each short had its own URL (something like <code>/shorts/[slug]</code>) so people can share them. With proper OG tags, shared links would show a video thumbnail and title on social platforms, which could help drive traffic back to the site.</p>
@@ -159,10 +153,9 @@ Prototype: <code>index.html</code> in this folder &middot; Production plan: <cod
   <tr><td>Progress bar track</td><td><code>rgba(29, 27, 25, 0.9)</code></td></tr>
   <tr><td>Product bubble bg</td><td><code>#404040</code> (or <code>#FFFFFF</code> per product)</td></tr>
   <tr><td>Mobile drawer bg</td><td><code>#2A2A2A</code></td></tr>
-  <tr><td>Widforss green</td><td><code>#154A29</code></td></tr>
+  <tr><td>Widrab green</td><td><code>#154A29</code></td></tr>
 </table>
 
-<p class="ref">Prototype and production plan are in the same folder. Open <code>index.html</code> or serve locally to try it out.</p>
 
 </body>
 </html>

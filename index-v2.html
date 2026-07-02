@@ -183,7 +183,13 @@
     border-radius: 12px; overflow: hidden; background: #000;
   }
   body.mobile-mode .video-card { border-radius: 0; }
+  /* 1px inner black ring masks the light sub-pixel seam the rounded mask leaves on the video edge */
+  .video-card::after { content: ''; position: absolute; inset: 0; border-radius: 12px; box-shadow: inset 0 0 0 1px #000; pointer-events: none; z-index: 3; }
+  body.mobile-mode .video-card::after { display: none; }
   .video-card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* embedded captioned HTML clip (shorts-video.html) as a slide */
+  .embed-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+  .shorts-feed.embed-active .shorts-info { display: none; }
   .video-gradient {
     position: absolute; inset: 0; pointer-events: none;
     background: linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,1) 100%);
@@ -635,6 +641,30 @@
     return a;
   }
 
+  function appendSlide(v) {
+    const idx = feed.length;
+    feed.push(v);
+    const slide = document.createElement('div');
+    slide.className = 'video-slide';
+    if (v.embed) {
+      slide.innerHTML = `<div class="video-card"><iframe class="embed-frame" src="${v.embed}" title="${escapeHtml(v.title || '')}" scrolling="no" tabindex="-1"></iframe></div>`;
+    } else {
+      slide.innerHTML = `
+        <div class="video-card">
+          <video src="${v.src}" muted playsinline preload="${idx < 2 ? 'auto' : 'metadata'}"></video>
+          <div class="video-gradient"></div>
+          <div class="video-progress"><div class="video-progress-track"><div class="video-progress-fill"></div></div></div>
+        </div>`;
+    }
+    viewport.appendChild(slide);
+    observer.observe(slide);
+    const vid = slide.querySelector('video');
+    if (vid) vid.addEventListener('ended', () => {
+      if (shortsFeed.classList.contains('panel-open')) { vid.currentTime = 0; vid.play().catch(() => {}); return; }
+      goToSlide(idx + 1);
+    });
+  }
+
   function addBatch() {
     let batch = shuffle(videos);
     const lastInFeed = feed.length > 0 ? feed[feed.length - 1].src : null;
@@ -642,25 +672,7 @@
       const swapIdx = batch.findIndex((v, i) => i > 0 && v.src !== lastInFeed);
       if (swapIdx > 0) [batch[0], batch[swapIdx]] = [batch[swapIdx], batch[0]];
     }
-    batch.forEach(v => {
-      const idx = feed.length;
-      feed.push(v);
-      const slide = document.createElement('div');
-      slide.className = 'video-slide';
-      slide.innerHTML = `
-        <div class="video-card">
-          <video src="${v.src}" muted playsinline preload="${idx < 2 ? 'auto' : 'metadata'}"></video>
-          <div class="video-gradient"></div>
-          <div class="video-progress"><div class="video-progress-track"><div class="video-progress-fill"></div></div></div>
-        </div>`;
-      viewport.appendChild(slide);
-      observer.observe(slide);
-      const vid = slide.querySelector('video');
-      vid.addEventListener('ended', () => {
-        if (shortsFeed.classList.contains('panel-open')) { vid.currentTime = 0; vid.play().catch(() => {}); return; }
-        goToSlide(idx + 1);
-      });
-    });
+    batch.forEach(appendSlide);
   }
 
   function goToSlide(index) {
@@ -711,8 +723,11 @@
     vpCardWrap.classList.remove('animate');
     void shortsInfo.offsetWidth;
 
-    siTitle.textContent = v.title;
-    siTime.textContent = v.time;
+    // embed slides (the captioned HTML clip) carry their own captions — hide the info column
+    shortsFeed.classList.toggle('embed-active', !!v.embed || !!v.noInfo);
+
+    siTitle.textContent = v.title || '';
+    siTime.textContent = v.time || '';
     siTags.innerHTML = (v.tags || []).map(t => `<span class="tag-chip">${escapeHtml(t)}</span>`).join('');
 
     const n = v.products ? v.products.length : 0;
@@ -737,6 +752,7 @@
     const allSlides = viewport.querySelectorAll('.video-slide');
     allSlides.forEach((slide, i) => {
       const vid = slide.querySelector('video');
+      if (!vid) return; /* embed slide has no <video> */
       if (i === currentIndex) { vid.play().catch(() => {}); vid.muted = isMuted; }
       else { vid.pause(); vid.currentTime = 0; }
     });
@@ -886,11 +902,18 @@
     closePanel();
   });
 
+  // Carry the view through from the entry page (start.html links with ?view=mobile)
+  if (new URLSearchParams(location.search).get('view') === 'mobile') btnMobile.click();
+
   // ---- Init ----
+  // First clip = the captioned "Klipp från er" montage, rendered to a real mp4 so it
+  // behaves exactly like any other video (no iframe). Baked captions sit centre-bottom;
+  // the left info column carries its own title/tags like every other clip.
+  appendSlide({ src: 'klipp-fran-er.mp4', title: 'Era bästa stunder', time: 'Nyss', tags: ['Friluft', 'Kund'], products: [] });
   addBatch();
   onSlideChange();
-  const firstVid = viewport.querySelector('.video-slide video');
-  if (firstVid) firstVid.play().catch(() => {});
+  const curVid = viewport.querySelectorAll('.video-slide')[currentIndex]?.querySelector('video');
+  if (curVid) curVid.play().catch(() => {});
 })();
 </script>
 
