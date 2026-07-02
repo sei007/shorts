@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Widforss Shorts</title>
+<style>
+  /* Figma type: "Greed Standard TRIAL Medium" */
+  @font-face { font-family: 'Greed Standard TRIAL'; src: url('fonts/GreedStandardTRIAL-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Greed Standard TRIAL'; src: url('fonts/GreedStandardTRIAL-Medium.otf') format('opentype'); font-weight: 500; font-display: swap; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #1F1E1D;
+    --rail-btn:  #3C3C39;
+    --rail-pill: #292926;
+    --add-green: #42541F;
+    --time-gray: #919191;
+    --prog-track:#474746;
+    --prog-fill: #C5CEB7;
+    --green-cart: #134B2B;
+    --search-bg:  #F4F4F4;
+    --gutter: clamp(24px, 4vw, 64px);
+    --ease-standard: cubic-bezier(0.25, 0, 0.15, 1);
+    --ease-expo-out: cubic-bezier(0.19, 1, 0.22, 1);
+    --ease-overshoot: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --ease-smooth-decel: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  html, body {
+    background: #ffffff;
+    color: #000;
+    font-family: 'Greed Standard TRIAL', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* Device toggle */
+  .device-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 9999;
+    display: flex; gap: 2px;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-radius: 10px; padding: 3px;
+  }
+  .device-toggle button {
+    background: none; border: none; cursor: pointer;
+    padding: 7px 14px; border-radius: 8px;
+    color: rgba(255,255,255,0.45);
+    font-size: 13px; font-weight: 500; letter-spacing: 0.02em;
+    transition: all 0.3s var(--ease-expo-out);
+  }
+  .device-toggle button.active { background: rgba(255,255,255,0.18); color: #fff; }
+
+  /* Screen frame */
+  .desktop-frame {
+    position: relative;
+    width: min(1672px, calc(100vw - 80px));
+    height: calc(100vh - 80px);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+    background: var(--bg);
+    transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1), height 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  body.mobile-mode .desktop-frame {
+    width: 390px; height: 760px; max-height: calc(100vh - 60px);
+    border-radius: 40px;
+    box-shadow: 0 0 0 8px #222, 0 30px 80px rgba(0, 0, 0, 0.3);
+  }
+
+  .page { background: var(--bg); height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* Content area — fullscreen dark player */
+  .content-area {
+    --video-h: min(1021px, calc(100vh - 250px));
+    --video-w: calc(var(--video-h) * 0.5622);
+    background: var(--bg);
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  body.mobile-mode .content-area { --video-h: 100%; --video-w: 100%; }
+
+  .shorts-feed { position: relative; width: 100%; height: 100%; }
+
+  /* Site header — refined Widforss nav (dept + logo + search/user/cart) */
+  .site-header {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    height: 67px; padding: 0 var(--gutter); background: #fff;
+  }
+  .dept { justify-self: start; display: flex; align-items: center; gap: 28px; }
+  .dept a { font-size: 16px; line-height: 20px; color: #000; padding: 2px 0; white-space: nowrap; }
+  .dept a.active { background: #3D4B19; color: #fff; font-weight: 500; padding: 4px 7px; border-radius: 6px; }
+  .logo-link { justify-self: center; line-height: 0; }
+  .logo-link svg { display: block; width: 140px; height: 36px; }
+  .header-right { display: flex; align-items: center; gap: 16px; justify-self: end; }
+  .search-bar {
+    width: 405px; height: 38px; background: var(--search-bg); border-radius: 6px;
+    display: flex; align-items: center; padding: 0 16px; gap: 12px;
+  }
+  .search-bar input {
+    flex: 1; min-width: 0; border: none; background: transparent;
+    font: 400 16px/20px 'Greed Standard TRIAL', sans-serif; color: #000; outline: none;
+  }
+  .search-bar input::placeholder { color: #000; opacity: 1; }
+  .search-bar svg { flex-shrink: 0; }
+  .ib { background: none; border: none; cursor: pointer; padding: 0; color: #000; display: flex; }
+  .ib svg { display: block; }
+  .cart-area { position: relative; }
+  .cart-badge {
+    position: absolute; top: -6px; right: -8px; width: 18px; height: 18px;
+    background: var(--green-cart); color: #fff; font-size: 10px; font-weight: 500;
+    border-radius: 50%; display: grid; place-items: center;
+  }
+  .nav-sep { height: 1px; background: #e1e1e1; }
+  /* desktop nav hidden on mobile, replaced by the compact mobile nav */
+  body.mobile-mode .site-header, body.mobile-mode .nav-sep { display: none; }
+
+  /* Mobile nav — compact Widforss header, sticky on top (ported from handoff.html) */
+  .mobile-nav { display: none; }
+  body.mobile-mode .mobile-nav {
+    display: block; flex: none; position: sticky; top: 0; z-index: 80;
+    background: #fff; padding: 26px 20px 16px;
+  }
+  .mn-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 30px; }
+  .mn-burger {
+    justify-self: start; background: none; border: none; padding: 0; cursor: pointer;
+    width: 18px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .mn-burger i { display: block; width: 18px; height: 1px; background: #000; }
+  .mn-logo { justify-self: center; line-height: 0; }
+  .mn-logo svg { display: block; width: 104px; height: 26px; }
+  .mn-right { justify-self: end; }
+  .mn-search {
+    margin-top: 15px; height: 46px; background: #F3F3F3; border-radius: 6px;
+    display: flex; align-items: center; gap: 12px; padding: 0 15px;
+  }
+  .mn-search svg { flex: none; color: #000; }
+  .mn-search input {
+    flex: 1; min-width: 0; border: none; background: transparent;
+    font: 500 16px/20px 'Greed Standard TRIAL', sans-serif; color: #000; outline: none;
+  }
+  .mn-search input::placeholder { color: #7A7A7A; opacity: 1; }
+
+  /* Close (top-right) */
+  .close-x {
+    position: absolute; top: 18px; right: 26px; z-index: 70;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--rail-pill); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s var(--ease-standard), transform 0.2s var(--ease-expo-out);
+  }
+  .close-x:hover { background: #34332f; transform: scale(1.06); }
+
+  /* ---- Video ---- */
+  .video-viewport {
+    position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+    width: var(--video-w); max-width: 100%; height: 100%;
+    overflow-y: scroll; scroll-snap-type: y mandatory;
+    scrollbar-width: none; -ms-overflow-style: none;
+    transition: transform 0.5s var(--ease-expo-out);
+  }
+  .video-viewport::-webkit-scrollbar { display: none; }
+  .video-slide {
+    position: relative; width: 100%; min-height: 100%;
+    scroll-snap-align: center; scroll-snap-stop: always; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .video-card {
+    position: relative; width: 100%; height: var(--video-h);
+    border-radius: 12px; overflow: hidden; background: #000;
+  }
+  body.mobile-mode .video-card { border-radius: 0; }
+  .video-card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .video-gradient {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,1) 100%);
+    opacity: 0.6;
+  }
+  /* Tap-to-pause indicator */
+  .pause-indicator {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.8);
+    width: 78px; height: 78px; border-radius: 50%;
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center; padding-left: 5px;
+    opacity: 0; pointer-events: none; z-index: 40;
+    transition: opacity 0.2s var(--ease-standard), transform 0.28s var(--ease-overshoot);
+  }
+  .shorts-feed.paused .pause-indicator { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+  /* Progress bar inside video, near bottom */
+  .video-progress { position: absolute; bottom: 20px; left: 17px; right: 17px; height: 16px; display: flex; align-items: center; cursor: pointer; }
+  .video-progress-track { width: 100%; height: 5px; background: var(--prog-track); border-radius: 16px; overflow: hidden; }
+  .video-progress-fill { height: 100%; background: var(--prog-fill); border-radius: 16px; width: 0%; }
+
+  /* ---- Left info column ---- */
+  .shorts-info {
+    position: absolute; left: clamp(40px, 4.3vw, 81px); top: 33%; z-index: 10;
+    display: flex; flex-direction: column; max-width: 320px;
+  }
+  .si-title, .si-time, .si-tags, .shop-all-btn { will-change: transform, opacity; }
+  .si-title {
+    font-weight: 500; font-size: 36px; line-height: 1.15; color: #fff;
+    max-width: 280px; opacity: 0; transform: translateY(16px);
+  }
+  .shorts-info.animate .si-title { animation: fadeUp 0.55s var(--ease-expo-out) 0s forwards; }
+  .si-time {
+    font-weight: 500; font-size: 18px; color: var(--time-gray);
+    margin-top: 6px; opacity: 0; transform: translateY(12px);
+  }
+  .shorts-info.animate .si-time { animation: fadeUp 0.5s var(--ease-expo-out) 0.07s forwards; }
+  .si-tags { display: flex; gap: 11px; margin-top: 28px; opacity: 0; transform: translateY(12px); }
+  .shorts-info.animate .si-tags { animation: fadeUp 0.5s var(--ease-expo-out) 0.14s forwards; }
+  .tag-chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 64px; height: 24px; border: 1px solid #fff; border-radius: 6px;
+    font-weight: 500; font-size: 14px; line-height: 1; color: #fff;
+  }
+  .shop-all-btn {
+    margin-top: 28px; align-self: flex-start;
+    background: #fff; color: #000; border: none; border-radius: 12px;
+    width: 170px; height: 36px; padding: 0 0 0 25px; text-align: left;
+    font-family: inherit; font-weight: 500; font-size: 16px; cursor: pointer;
+    opacity: 0; transform: translateY(12px);
+    transition: background 0.2s var(--ease-standard);
+  }
+  .shorts-info.animate .shop-all-btn { animation: fadeUp 0.5s var(--ease-overshoot) 0.2s forwards; }
+  .shop-all-btn:hover { background: #ececec; }
+  .shop-all-btn[hidden] { display: none; }
+
+  /* ---- Right rail ---- */
+  .shorts-rail {
+    position: absolute; left: calc(50% + var(--video-w) * 0.58); top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: center; z-index: 55;
+  }
+  .rail-arrow {
+    width: 41px; height: 44px; border-radius: 12px; background: var(--rail-btn);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s var(--ease-standard), transform 0.2s var(--ease-expo-out);
+  }
+  .rail-arrow + .rail-arrow { margin-top: 8px; }
+  .rail-arrow:hover { background: #46463f; }
+  .rail-arrow:active { transform: scale(0.92); transition-duration: 0.1s; }
+  .rail-pill {
+    margin-top: 34px; width: 41px; min-height: 90px; border-radius: 12px; background: var(--rail-pill);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px 0; gap: 28px;
+  }
+  .rail-pill-btn {
+    background: none; border: none; cursor: pointer; padding: 2px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0.92; transition: opacity 0.2s, transform 0.2s var(--ease-expo-out);
+  }
+  .rail-pill-btn:hover { opacity: 1; transform: scale(1.1); }
+  .rail-pill-btn.saved svg path { fill: var(--prog-fill); stroke: var(--prog-fill); }
+  /* mute button: swap sound / muted icon by state */
+  .rail-pill-btn .ic-muted { display: none; }
+  .rail-pill-btn.muted .ic-sound { display: none; }
+  .rail-pill-btn.muted .ic-muted { display: block; }
+
+  /* Context menu (the "..." opens save/share) */
+  .rail-menu {
+    position: absolute; right: 53px; top: calc(50% + 36px);
+    background: var(--rail-pill); border-radius: 12px; padding: 6px;
+    display: flex; flex-direction: column; min-width: 132px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    opacity: 0; transform: translateX(8px) scale(0.96); transform-origin: right center;
+    pointer-events: none; transition: opacity 0.2s var(--ease-standard), transform 0.2s var(--ease-expo-out);
+    z-index: 60;
+  }
+  .rail-menu.open { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
+  .rail-menu button {
+    display: flex; align-items: center; gap: 10px;
+    background: none; border: none; cursor: pointer; text-align: left;
+    padding: 9px 12px; border-radius: 8px; color: #fff;
+    font-family: inherit; font-weight: 500; font-size: 14px;
+    transition: background 0.15s;
+  }
+  .rail-menu button:hover { background: rgba(255,255,255,0.08); }
+
+  /* ---- Bottom-left product card (single product) ---- */
+  .vp-card-wrap {
+    position: absolute; left: clamp(40px, 4.3vw, 81px); z-index: 10;
+    bottom: calc((100% - var(--video-h)) / 2); /* card bottom on the video's bottom line */
+    transition: opacity 0.4s var(--ease-standard), transform 0.45s var(--ease-expo-out);
+  }
+  .vp-card-wrap[hidden] { display: none; }
+  .vp-card-wrap.dismissed { opacity: 0; transform: translateY(24px); pointer-events: none; }
+  .vp-card-label {
+    font-weight: 500; font-size: 18px; color: #fff; margin-bottom: 22px;
+    opacity: 0; transform: translateY(12px);
+  }
+  .vp-card-wrap.animate .vp-card-label { animation: fadeUp 0.5s var(--ease-expo-out) 0.1s forwards; }
+  .vp-card {
+    position: relative; width: 330px; height: 150px; background: #fff; border-radius: 12px;
+    padding: 16px; display: flex; gap: 14px;
+    opacity: 0; transform: translateY(16px) scale(0.97);
+  }
+  .vp-card-wrap.animate .vp-card { animation: cardIn 0.55s var(--ease-overshoot) 0.18s forwards; }
+  .vp-card-thumb {
+    width: 89px; height: 115px; border-radius: 12px; background: #B8B8B8; flex: none;
+    align-self: center; overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .vp-card-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 14px; mix-blend-mode: darken; }
+  .vp-card-col { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; }
+  .vp-card-name {
+    font-weight: 500; font-size: 14px; color: #000; line-height: 1.25;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; padding-right: 18px;
+  }
+  .vp-card-freight { font-weight: 500; font-size: 14px; color: var(--time-gray); margin-top: 8px; }
+  .vp-card-bottom { margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
+  .vp-card-price { font-weight: 500; font-size: 14px; color: #000; }
+  .vp-card-add {
+    height: 25px; padding: 0 12px; border: none; border-radius: 6px;
+    background: var(--add-green); color: #fff; font-family: inherit; font-weight: 500; font-size: 14px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .vp-card-add:hover { background: #506626; }
+  .vp-card-x {
+    position: absolute; top: 14px; right: 14px; width: 16px; height: 16px;
+    background: none; border: none; cursor: pointer; padding: 0; opacity: 0.6;
+    display: flex; align-items: center; justify-content: center; transition: opacity 0.15s;
+  }
+  .vp-card-x:hover { opacity: 1; }
+
+  /* ---- Scrim behind the shop panel (dims the video + chrome) ---- */
+  .shop-scrim {
+    position: absolute; inset: 0; background: #000; opacity: 0;
+    pointer-events: none; z-index: 56; /* above video/info/rail (55), below panel (60) & close-x (70) */
+    transition: opacity 0.45s var(--ease-standard);
+  }
+  .shorts-feed.panel-open .shop-scrim { opacity: 0.55; pointer-events: auto; }
+
+  /* ---- Bottom "Shop the products" panel ---- */
+  .shop-panel {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 60; /* above the rail (55) so mute/arrows don't overlap */
+    background: #fff; padding: 26px clamp(40px, 4.3vw, 74px) 30px;
+    transform: translateY(100%);
+    transition: transform 0.55s var(--ease-expo-out);
+    max-height: 56%; display: flex; flex-direction: column;
+  }
+  .shorts-feed.panel-open .shop-panel { transform: translateY(0); }
+  /* dim everything behind the panel */
+  .shorts-feed.panel-open .shorts-info,
+  .shorts-feed.panel-open .shorts-rail,
+  .shorts-feed.panel-open .vp-card-wrap { opacity: 0.34; pointer-events: none; transition: opacity 0.4s var(--ease-standard); }
+  .shorts-feed.panel-open .video-viewport { transform: translateX(-50%) translateY(-48px); }
+  .shop-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .shop-panel-title { font-weight: 500; font-size: 16px; color: #000; }
+  .shop-panel-toggle {
+    background: none; border: none; cursor: pointer; padding: 6px; opacity: 0.7;
+    display: flex; align-items: center; justify-content: center; transition: opacity 0.15s;
+  }
+  .shop-panel-toggle:hover { opacity: 1; }
+  .shop-panel-row { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+  .sp-card {
+    flex: 0 0 auto; width: 303px; height: 94px; display: flex; align-items: center; gap: 11px;
+    background: #fff; border: 1px solid #DBDBDB; border-radius: 12px; padding: 16px 16px 16px 17px;
+    opacity: 0; transform: translateY(14px);
+  }
+  .shorts-feed.panel-open .sp-card { animation: fadeUp 0.5s var(--ease-expo-out) forwards; }
+  .shorts-feed.panel-open .sp-card:nth-child(1) { animation-delay: 0.18s; }
+  .shorts-feed.panel-open .sp-card:nth-child(2) { animation-delay: 0.26s; }
+  .shorts-feed.panel-open .sp-card:nth-child(3) { animation-delay: 0.34s; }
+  .shorts-feed.panel-open .sp-card:nth-child(4) { animation-delay: 0.42s; }
+  .sp-card-thumb {
+    width: 49px; height: 62px; border-radius: 12px; background: #E6E6E6; flex: none;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .sp-card-thumb img { width: 34px; height: 44px; object-fit: contain; mix-blend-mode: darken; }
+  .sp-card-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .sp-card-name { font-weight: 500; font-size: 14px; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sp-card-price { font-weight: 500; font-size: 14px; color: var(--time-gray); }
+  .sp-card-add {
+    flex: none; width: 68px; height: 25px; padding: 0; border: none; border-radius: 6px;
+    background: var(--add-green); color: #fff; font-family: inherit; font-weight: 500; font-size: 14px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .sp-card-add:hover { background: #506626; }
+
+  /* ---- Toast ---- */
+  .toast {
+    position: absolute; bottom: 34px; left: 50%; transform: translate(-50%, 14px);
+    background: rgba(33, 47, 19, 0.96); color: #fff;
+    padding: 11px 20px; border-radius: 12px;
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    z-index: 90; opacity: 0; pointer-events: none; white-space: nowrap;
+    transition: opacity 0.25s var(--ease-standard), transform 0.35s var(--ease-overshoot);
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---- keyframes ---- */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  /* ---- Mobile adaptation (basic) ---- */
+  /* explicit heights so the video-card's 100% height resolves (else it collapses → blank) */
+  body.mobile-mode .video-slide { height: 100%; min-height: 0; }
+  body.mobile-mode .video-card { height: 100%; }
+  body.mobile-mode .video-viewport { left: 0; transform: none; }
+  body.mobile-mode .shorts-feed.panel-open .video-viewport { transform: translateY(-40px); }
+  /* text/buttons sit ~28px above the player controls (progress bar at bottom:20 + ~8) */
+  body.mobile-mode .shorts-info { left: 20px; top: auto; bottom: 56px; max-width: 70%; transition: bottom 0.5s var(--ease-expo-out); }
+  /* single-product on mobile: text lifts to sit 28px above the card (card 150 + 28 + 56 bottom) */
+  body.mobile-mode .shorts-feed.has-product .shorts-info { bottom: 234px; }
+  /* dismissing the card drops the text back to the bottom */
+  body.mobile-mode .shorts-feed.card-dismissed .shorts-info { bottom: 56px; }
+  /* mobile: drop the "Produkt fra video:" label for simplicity */
+  body.mobile-mode .vp-card-label { display: none; }
+  body.mobile-mode .si-title { font-size: 24px; }
+  body.mobile-mode .si-time { font-size: 14px; }
+  body.mobile-mode .shorts-rail { left: auto; right: 14px; top: 50%; bottom: auto; transform: translateY(-50%); }
+  body.mobile-mode .vp-card-wrap { bottom: 56px; left: 20px; right: auto; }
+  body.mobile-mode .close-x { top: 14px; right: 14px; }
+
+  /* shop panel (mobile): row runs full-bleed to the right edge so the peek isn't
+     clipped; the head keeps its own right inset so the chevron stays put; card 1
+     left edge aligns with the "Shop the products" heading */
+  body.mobile-mode .shop-panel { padding-left: 20px; padding-right: 0; max-height: 62%; }
+  body.mobile-mode .shop-panel-head { padding-right: 20px; }
+  body.mobile-mode .shop-panel-row {
+    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    margin: 0; padding-left: 0; padding-right: 20px;
+  }
+  body.mobile-mode .sp-card { width: 282px; flex: 0 0 auto; scroll-snap-align: start; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="ic-logo" viewBox="0 0 140 36"><path d="M4.95801 34.4624L5.11974 35.0951C24.1901 32.4974 43.658 31.1538 63.439 31.1538C83.2199 31.1538 102.688 32.4974 121.758 35.0951C124.576 29.725 129.949 25.9131 136.257 25.2867C135.316 25.2836 134.375 25.2812 133.433 25.2812C89.808 25.2812 46.9129 28.4127 4.95801 34.4624Z" fill="#3D4B19"/><path d="M14.1672 21.3143L16.0518 29.3347L21.4684 28.6435C23.6554 26.2883 29.1414 17.8135 30.3973 11.1338L23.4326 11.9461C23.7673 13.3932 21.6626 18.2151 19.3502 21.0916L19.2748 21.1854L17.3474 12.6996L12.7933 13.2891L8.41862 22.8518L6.49857 14.1427L0 15.0653L4.07014 30.9877L10.2178 30.1171L14.1672 21.3143Z" fill="#3D4B19"/><path d="M35.2676 27.03L38.4459 10.2725L32.0387 10.9572L28.8525 27.7565L35.2676 27.03Z" fill="#3D4B19"/><path d="M39.707 5.54749C39.7411 3.93571 38.3066 2.69721 36.7126 2.73523C33.7527 2.671 31.0881 6.30427 33.3953 8.52633C35.6072 10.5448 39.7648 8.32739 39.707 5.54749Z" fill="#3D4B19"/><path d="M40.5155 24.3162C44.1073 27.9004 51.2858 26.081 54.1398 22.7628L55.1465 25.0959C58.337 23.1728 64.7738 22.6288 67.6954 24.0983L69.3859 15.1831C69.4506 15.1781 74.7203 14.7911 74.7814 14.7865C73.9473 18.4845 75.8192 21.7988 79.3773 22.9706C85.9523 25.2264 94.0594 20.3184 94.3856 13.7082C94.5249 11.692 93.9004 9.90847 92.5797 8.55075C88.5198 4.55946 81.0072 5.96759 77.381 9.90365C77.3699 9.90471 70.3054 10.4237 70.2898 10.4249L70.5612 8.98996C71.0092 6.62752 73.062 5.54426 74.6839 5.33457C75.4274 5.23845 77.4055 5.23784 77.9914 5.56765L78.9825 0.343047C74.1112 -0.838709 65.688 0.907823 64.5581 7.53933C64.558 7.53933 62.642 17.6505 62.642 17.6505C62.4609 18.6062 61.6292 19.3 60.6645 19.3C59.3588 19.4201 58.249 18.1537 58.5205 16.8651L61.3735 1.82321L54.9998 2.33987L53.3777 10.884C52.4466 9.6634 50.778 9.01882 48.7316 9.01149C41.0191 8.88155 35.1473 18.9354 40.5155 24.3162ZM80.801 15.3268C80.9257 12.421 85.1621 10.0846 87.441 12.3427C89.6231 14.7337 86.7262 18.3081 83.7814 18.2387C82.062 18.2688 80.6671 17.0635 80.801 15.3268ZM44.8127 18.1297C44.8339 15.1425 49.2592 12.6675 51.7003 14.8891C54.0739 17.3388 50.9454 21.0675 47.8559 21.0009C46.1616 21.031 44.7465 19.8529 44.8127 18.1297Z" fill="#3D4B19"/><path d="M100.683 22.3068L101.868 16.059C102.479 12.8352 105.641 11.0562 108.449 10.965C108.83 10.9522 109.338 10.9899 109.669 11.1279L110.742 5.45761C108.283 4.9402 104.699 6.50285 103.238 8.83554L103.803 5.85684L97.4812 6.08165L94.3555 22.5576L100.683 22.3068Z" fill="#3D4B19"/><path d="M113.727 15.4294L113.743 15.4425C114.196 15.806 114.788 16.4912 114.389 17.0671C113.526 18.0699 108.872 17.2641 107.805 16.3982L106.758 21.9187C110.187 22.671 121.394 22.9527 121.557 16.7432C121.608 15.6744 121.147 14.6479 120.435 13.9197C119.853 13.304 119.195 12.895 118.444 12.4617C117.929 12.1567 117.22 11.6981 117.065 11.1893C116.782 10.1664 118.22 9.90908 119.03 9.86715C120.592 9.76347 123.158 10.0701 123.873 10.6321L124.805 5.71722C120.271 4.32821 112.192 5.0665 111.064 9.9531C110.354 12.5352 112.072 14.2414 113.727 15.4294Z" fill="#3D4B19"/><path d="M134.224 9.707C135.787 9.60331 138.352 9.90991 139.067 10.4719L140 5.55707C135.466 4.16805 127.386 4.90633 126.258 9.79293C125.548 12.375 127.267 14.0812 128.921 15.2693L128.937 15.2823C129.39 15.6458 129.982 16.331 129.583 16.9069C128.72 17.9098 124.066 17.1039 122.999 16.2381L121.952 21.7585C125.381 22.5108 136.588 22.7926 136.751 16.583C136.802 15.5143 136.341 14.4877 135.629 13.7595C135.047 13.1438 134.389 12.7349 133.638 12.3015C133.123 11.9965 132.414 11.5379 132.259 11.0292C131.976 10.0062 133.414 9.74892 134.224 9.707Z" fill="#3D4B19"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 17 17"><path d="M16.418 15.5153L12.4252 11.5233C13.5825 10.1339 14.1596 8.35179 14.0364 6.54775C13.9132 4.74371 13.0993 3.0566 11.7639 1.83739C10.4285 0.618178 8.67448 -0.0392688 6.86671 0.00181581C5.05893 0.0429005 3.33659 0.779353 2.05797 2.05797C0.779353 3.33659 0.0429005 5.05893 0.00181581 6.86671C-0.0392688 8.67448 0.618178 10.4285 1.83739 11.7639C3.0566 13.0993 4.74371 13.9132 6.54775 14.0364C8.35179 14.1596 10.1339 13.5825 11.5233 12.4252L15.5153 16.418C15.5746 16.4773 15.645 16.5243 15.7224 16.5564C15.7998 16.5885 15.8828 16.605 15.9667 16.605C16.0505 16.605 16.1335 16.5885 16.2109 16.5564C16.2884 16.5243 16.3588 16.4773 16.418 16.418C16.4773 16.3588 16.5243 16.2884 16.5564 16.2109C16.5885 16.1335 16.605 16.0505 16.605 15.9667C16.605 15.8828 16.5885 15.7998 16.5564 15.7224C16.5243 15.645 16.4773 15.5746 16.418 15.5153ZM1.29355 7.03521C1.29355 5.89961 1.63029 4.78952 2.26119 3.84531C2.89209 2.9011 3.78882 2.16518 4.83797 1.73061C5.88712 1.29603 7.04157 1.18233 8.15535 1.40387C9.26912 1.62542 10.2922 2.17226 11.0952 2.97524C11.8982 3.77823 12.445 4.80129 12.6665 5.91506C12.8881 7.02884 12.7744 8.18329 12.3398 9.23244C11.9052 10.2816 11.1693 11.1783 10.2251 11.8092C9.28089 12.4401 8.1708 12.7769 7.03521 12.7769C5.51294 12.7752 4.05351 12.1697 2.97711 11.0933C1.9007 10.0169 1.29524 8.55747 1.29355 7.03521Z" fill="currentColor"/></symbol>
+  <symbol id="ic-user" viewBox="0 0 17 16"><path d="M16.5089 14.9943C15.2944 12.8946 13.4227 11.389 11.2385 10.6753C12.3189 10.0321 13.1584 9.05204 13.6279 7.88562C14.0974 6.7192 14.171 5.43091 13.8375 4.21858C13.5039 3.00626 12.7817 1.93694 11.7816 1.17484C10.7815 0.412742 9.55887 0 8.30151 0C7.04414 0 5.82153 0.412742 4.82145 1.17484C3.82136 1.93694 3.09908 3.00626 2.76555 4.21858C2.43201 5.43091 2.50565 6.7192 2.97515 7.88562C3.44466 9.05204 4.28408 10.0321 5.36449 10.6753C3.18027 11.3882 1.30865 12.8938 0.0941284 14.9943C0.0495898 15.0669 0.0200476 15.1477 0.007245 15.2319C-0.00555765 15.3162 -0.00136147 15.4021 0.0195859 15.4847C0.0405334 15.5672 0.0778077 15.6448 0.12921 15.7127C0.180612 15.7807 0.2451 15.8376 0.31887 15.8802C0.39264 15.9228 0.474198 15.9502 0.55873 15.9608C0.643263 15.9714 0.729058 15.9649 0.811055 15.9418C0.893051 15.9187 0.969588 15.8794 1.03615 15.8262C1.10271 15.7731 1.15795 15.7071 1.1986 15.6322C2.701 13.0357 5.35652 11.4855 8.30151 11.4855C11.2465 11.4855 13.902 13.0357 15.4044 15.6322C15.4451 15.7071 15.5003 15.7731 15.5669 15.8262C15.6334 15.8794 15.71 15.9187 15.792 15.9418C15.874 15.9649 15.9598 15.9714 16.0443 15.9608C16.1288 15.9502 16.2104 15.9228 16.2841 15.8802C16.3579 15.8376 16.4224 15.7807 16.4738 15.7127C16.5252 15.6448 16.5625 15.5672 16.5834 15.4847C16.6044 15.4021 16.6086 15.3162 16.5958 15.2319C16.583 15.1477 16.5534 15.0669 16.5089 14.9943ZM3.83577 5.74383C3.83577 4.86059 4.09768 3.99718 4.58839 3.2628C5.07909 2.52841 5.77654 1.95603 6.59254 1.61803C7.40855 1.28003 8.30646 1.19159 9.17273 1.3639C10.039 1.53621 10.8347 1.96153 11.4593 2.58608C12.0838 3.21062 12.5091 4.00634 12.6814 4.8726C12.8537 5.73887 12.7653 6.63678 12.4273 7.45279C12.0893 8.26879 11.5169 8.96625 10.7825 9.45695C10.0481 9.94765 9.18475 10.2096 8.30151 10.2096C7.11751 10.2083 5.98237 9.73739 5.14516 8.90018C4.30794 8.06296 3.83704 6.92782 3.83577 5.74383Z" fill="currentColor"/></symbol>
+  <symbol id="ic-cart" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.65554 0C8.70457 0 9.71063 0.416724 10.4524 1.1585C11.1942 1.90027 11.6109 2.90634 11.6109 3.95536H15.3111V11.3557L15.306 11.566C15.2543 12.5751 14.8302 13.5292 14.1158 14.2437C13.4015 14.9583 12.4475 15.3826 11.4384 15.4346L11.2281 15.4387H4.08296L3.87268 15.4336C2.86358 15.3819 1.9095 14.9578 1.19493 14.2434C0.480357 13.529 0.0560588 12.5751 0.0040829 11.566L0 11.3557V3.95536H3.70018C3.70018 2.90634 4.1169 1.90027 4.85868 1.1585C5.60045 0.416724 6.60651 0 7.65554 0ZM1.53111 11.3557C1.53111 12.0325 1.79996 12.6816 2.27853 13.1601C2.75709 13.6387 3.40616 13.9076 4.08296 13.9076H11.2281C11.9049 13.9076 12.554 13.6387 13.0326 13.1601C13.5111 12.6816 13.78 12.0325 13.78 11.3557V5.48647H1.53111V11.3557ZM7.65554 1.53111C7.01259 1.53111 6.39597 1.78652 5.94134 2.24116C5.4867 2.69579 5.23129 3.31241 5.23129 3.95536H10.0798C10.0798 3.31241 9.82439 2.69579 9.36975 2.24116C8.91511 1.78652 8.29849 1.53111 7.65554 1.53111Z" fill="currentColor"/></symbol>
+</svg>
+
+<div class="device-toggle">
+  <button class="active" id="toggleDesktop">Desktop</button>
+  <button id="toggleMobile">Mobile</button>
+</div>
+
+<div class="desktop-frame">
+<div class="page">
+
+  <header class="site-header">
+    <nav class="dept"><a class="active" href="#">Herr</a><a href="#">Dame</a><a href="#">Barn</a><a href="#">Jakt</a><a href="#">Friluftsliv</a><a href="#">Hund</a></nav>
+    <a href="#" class="logo-link" aria-label="Widforss"><svg width="140" height="36"><use href="#ic-logo"/></svg></a>
+    <div class="header-right">
+      <div class="search-bar">
+        <svg width="17" height="17"><use href="#ic-search"/></svg>
+        <input type="search" placeholder="Sök efter produkter">
+      </div>
+      <button class="ib" aria-label="Logg inn"><svg width="17" height="16"><use href="#ic-user"/></svg></button>
+      <div class="cart-area">
+        <button class="ib" aria-label="Kundvagn"><svg width="16" height="16"><use href="#ic-cart"/></svg></button>
+        <span class="cart-badge">1</span>
+      </div>
+    </div>
+  </header>
+  <div class="nav-sep"></div>
+
+  <nav class="mobile-nav" aria-label="Widforss">
+    <div class="mn-top">
+      <button class="mn-burger" aria-label="Meny"><i></i><i></i></button>
+      <a href="#" class="mn-logo" aria-label="Widforss"><svg width="104" height="26"><use href="#ic-logo"/></svg></a>
+      <div class="mn-right cart-area">
+        <button class="ib" aria-label="Kundvagn"><svg width="17" height="17"><use href="#ic-cart"/></svg></button>
+        <span class="cart-badge">1</span>
+      </div>
+    </div>
+    <div class="mn-search">
+      <svg width="17" height="17"><use href="#ic-search"/></svg>
+      <input type="search" placeholder="Sök efter produkter">
+    </div>
+  </nav>
+
+  <div class="content-area">
+    <div class="shorts-feed" id="shortsFeed">
+
+      <button class="close-x" id="closeX" aria-label="Lukk">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+
+      <!-- Left info -->
+      <div class="shorts-info" id="shortsInfo">
+        <div class="si-title" id="siTitle"></div>
+        <div class="si-time" id="siTime"></div>
+        <div class="si-tags" id="siTags"></div>
+        <button class="shop-all-btn" id="shopAllBtn" hidden>Shop all products</button>
+      </div>
+
+      <!-- Video -->
+      <div class="video-viewport" id="videoViewport"></div>
+      <div class="pause-indicator" id="pauseIndicator" aria-hidden="true">
+        <svg width="26" height="30" viewBox="0 0 26 30" fill="none"><path d="M2 2.5L24 15L2 27.5V2.5Z" fill="#fff"/></svg>
+      </div>
+
+      <!-- Right rail -->
+      <div class="shorts-rail" id="shortsRail">
+        <button class="rail-arrow" id="navUp" aria-label="Forrige">
+          <svg width="13" height="8" viewBox="0 0 13 8" fill="none"><path d="M1 7L6.5 1L12 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="rail-arrow" id="navDown" aria-label="Neste">
+          <svg width="13" height="8" viewBox="0 0 13 8" fill="none"><path d="M1 1L6.5 7L12 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="rail-pill">
+          <button class="rail-pill-btn" id="moreBtn" aria-label="Mer">
+            <svg width="16" height="4" viewBox="0 0 16 4" fill="none"><circle cx="2" cy="2" r="1.6" fill="#fff"/><circle cx="8" cy="2" r="1.6" fill="#fff"/><circle cx="14" cy="2" r="1.6" fill="#fff"/></svg>
+          </button>
+          <button class="rail-pill-btn muted" id="muteBtn" aria-label="Lyd av/på">
+            <svg class="ic-sound" width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.33692 12.7473C8.36149 12.7491 8.38627 12.7439 8.4082 12.7327C8.43016 12.7214 8.449 12.7039 8.46192 12.6829C8.47464 12.662 8.48132 12.638 8.48145 12.6135L8.48145 0.831294C8.48085 0.807583 8.47434 0.784147 8.46191 0.763911C8.449 0.742928 8.43013 0.726323 8.4082 0.715083C8.38625 0.703831 8.36152 0.698647 8.33691 0.700434C8.31238 0.70226 8.28859 0.710583 8.26855 0.724848L8.26953 0.724848L3.74512 3.95434L3.56348 4.0852L0.834961 4.0852C0.79924 4.0852 0.764518 4.099 0.739258 4.12426C0.714002 4.14952 0.700196 4.18425 0.700196 4.21997L0.700196 9.22778C0.700196 9.2635 0.713999 9.29822 0.739259 9.32348C0.764507 9.34867 0.799294 9.36254 0.834962 9.36254L3.56348 9.36254L3.74512 9.49243L8.26953 12.7229L8.26856 12.7239C8.2885 12.7379 8.31258 12.7455 8.33692 12.7473Z" stroke="white" stroke-width="1.4"/>
+              <mask id="mute-sound-mask" fill="white">
+                <path d="M11.6855 9.22783L12.5202 9.22783L12.5202 4.21969L11.6855 4.21969L11.6855 9.22783ZM14.1896 10.8972L15.0243 10.8972L15.0243 2.55031L14.1896 2.55031L14.1896 10.8972Z"/>
+              </mask>
+              <path d="M11.6855 9.22783L11.6855 11.2278L9.68555 11.2278L9.68555 9.22783L11.6855 9.22783ZM12.5202 9.22783L14.5202 9.22783L14.5202 11.2278L12.5202 11.2278L12.5202 9.22783ZM12.5202 4.21969L12.5202 2.21969L14.5202 2.21969L14.5202 4.21969L12.5202 4.21969ZM11.6855 4.21969L9.68555 4.21969L9.68555 2.21969L11.6855 2.21969L11.6855 4.21969ZM14.1896 10.8972L14.1896 12.8972L12.1896 12.8972L12.1896 10.8972L14.1896 10.8972ZM15.0243 10.8972L17.0243 10.8972L17.0243 12.8972L15.0243 12.8972L15.0243 10.8972ZM15.0243 2.55031L15.0243 0.550315L17.0243 0.550315L17.0243 2.55031L15.0243 2.55031ZM14.1896 2.55032L12.1896 2.55032L12.1896 0.550315L14.1896 0.550315L14.1896 2.55032ZM11.6855 9.22783L11.6855 7.22783L12.5202 7.22783L12.5202 9.22783L12.5202 11.2278L11.6855 11.2278L11.6855 9.22783ZM12.5202 9.22783L10.5202 9.22783L10.5202 4.21969L12.5202 4.21969L14.5202 4.21969L14.5202 9.22783L12.5202 9.22783ZM12.5202 4.21969L12.5202 6.21969L11.6855 6.21969L11.6855 4.21969L11.6855 2.21969L12.5202 2.21969L12.5202 4.21969ZM11.6855 4.21969L13.6855 4.21969L13.6855 9.22783L11.6855 9.22783L9.68555 9.22783L9.68555 4.21969L11.6855 4.21969ZM14.1896 10.8972L14.1896 8.89721L15.0243 8.89721L15.0243 10.8972L15.0243 12.8972L14.1896 12.8972L14.1896 10.8972ZM15.0243 10.8972L13.0243 10.8972L13.0243 2.55032L15.0243 2.55031L17.0243 2.55031L17.0243 10.8972L15.0243 10.8972ZM15.0243 2.55031L15.0243 4.55031L14.1896 4.55032L14.1896 2.55032L14.1896 0.550315L15.0243 0.550315L15.0243 2.55031ZM14.1896 2.55032L16.1896 2.55031L16.1896 10.8972L14.1896 10.8972L12.1896 10.8972L12.1896 2.55032L14.1896 2.55032Z" fill="white" mask="url(#mute-sound-mask)"/>
+            </svg>
+            <svg class="ic-muted" width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.33692 12.7473C8.36149 12.7491 8.38627 12.7439 8.4082 12.7327C8.43016 12.7214 8.449 12.7039 8.46192 12.6829C8.47464 12.662 8.48132 12.638 8.48145 12.6135L8.48145 0.831294C8.48085 0.807583 8.47434 0.784147 8.46191 0.763911C8.449 0.742928 8.43013 0.726323 8.4082 0.715083C8.38625 0.703831 8.36152 0.698647 8.33691 0.700434C8.31238 0.70226 8.28859 0.710583 8.26855 0.724848L8.26953 0.724848L3.74512 3.95434L3.56348 4.0852L0.834961 4.0852C0.79924 4.0852 0.764518 4.099 0.739258 4.12426C0.714002 4.14952 0.700196 4.18425 0.700196 4.21997L0.700196 9.22778C0.700196 9.2635 0.713999 9.29822 0.739259 9.32348C0.764507 9.34867 0.799294 9.36254 0.834962 9.36254L3.56348 9.36254L3.74512 9.49243L8.26953 12.7229L8.26856 12.7239C8.2885 12.7379 8.31258 12.7455 8.33692 12.7473Z" stroke="white" stroke-width="1.4"/>
+              <path d="M15.0244 7.91577L13.832 6.72436L15.0244 5.53198L14.5479 5.05444L13.3545 6.24682L12.1631 5.05444L11.6855 5.53198L12.877 6.72436L11.6855 7.91577L12.1631 8.39331L13.3545 7.2019L14.5469 8.39331L15.0244 7.91577Z" fill="white"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="rail-menu" id="railMenu">
+          <button data-act="save">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7.5-4.6-10-9.2C.6 9 1.4 5.4 4.4 4.2 6.6 3.3 9 4 10.3 5.8L12 8l1.7-2.2C15 4 17.4 3.3 19.6 4.2c3 1.2 3.8 4.8 2.4 7.6C19.5 16.4 12 21 12 21z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            Lagre
+          </button>
+          <button data-act="share">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 16V3M12 3 7 8M12 3l5 5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Del
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom-left product card (single product) -->
+      <div class="vp-card-wrap" id="vpCardWrap" hidden>
+        <div class="vp-card-label">Produkt fra video:</div>
+        <div class="vp-card" id="vpCard"></div>
+      </div>
+
+      <!-- Scrim behind the shop panel -->
+      <div class="shop-scrim" id="shopScrim"></div>
+
+      <!-- Bottom "Shop the products" panel -->
+      <div class="shop-panel" id="shopPanel">
+        <div class="shop-panel-head">
+          <span class="shop-panel-title">Shop the products</span>
+          <button class="shop-panel-toggle" id="panelToggle" aria-label="Lukk">
+            <svg width="16" height="9" viewBox="0 0 16 9" fill="none"><path d="M1 1L8 8L15 1" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="shop-panel-row" id="shopPanelRow"></div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast" id="toast"></div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+(function() {
+  const videos = [
+    { src: 'SnapInsta.to_AQMvRqrxCp1k3C1N975d91bavqYCYKMBul9Kktj2yqpILzdCkufZH_Ks_FaeOseu6n3sbgnOE8ucXplwSB28y7v3GuKJL3mRiAfmccc.mp4',
+      title: 'Hemma i naturen', time: '10 min siden', tags: ['Friluft'], products: [] },
+    { src: 'SnapInsta.to_AQNAA6XSsiZrXgJPMYQEaiN7rcK7bvE5r8A04hu2z5EyID9HhnVrFcC3kzs4ZTWhEhN50zNfcbYhp3ehYATYPSq9oN7ZLS7pXuvZ3b4.mp4',
+      title: 'Vintertur i fjällen', time: '35 min siden', tags: ['Friluft', 'Jakt'],
+      products: [ { brand: 'Crispi', name: 'Summit GTX Jaktstövlar', price: '4 299 kr', img: 'skoo.png', freight: 'Gratis frakt!' } ] },
+    { src: 'SnapInsta.to_AQOXPGgcx70qtQNQ9pjM5Hc0mL6XLphl9_5AXEXz4E7NEPraInD-vHxiaZuNC-JvvC3kzDT5_gla2Xvs9ROfXjQNs7WpQk7bypZQiJk.mp4',
+      title: 'Morgon vid sjön', time: '1 tim sedan', tags: ['Friluft'],
+      products: [ { brand: 'Stabilotherm', name: 'Vaffeljärn Älg', price: '399 kr', img: 'mat.webp' } ] },
+    { src: 'SnapInsta.to_AQP9ZDSEZS3pE4-mPx2REq79l4nIFBL9fHAd70lai536YfaIbi4wvZfw7Yi63NRpjXN9aIwYYYp_aCoZC61In5Xb6XRZxK7E2jAO-QU.mp4',
+      title: 'Jakten börjar', time: '2 tim sedan', tags: ['Jakt', 'Friluft'],
+      products: [
+        { brand: 'Crispi', name: 'Summit GTX Jaktstövlar', price: '4 299 kr', img: 'skoo.png', freight: 'Gratis frakt!' },
+        { brand: 'Härkila', name: 'Trucker Caps', price: '349 kr', img: 'caps.png' },
+        { brand: 'Härkila', name: 'Pro Hunter GTX Jacket', price: '8 999 kr', img: 'harkilaa.png', freight: 'Gratis frakt!' },
+      ] },
+    { src: 'SnapInsta.to_AQPKH78_nvSITJpunsEZkA24d1cEYbtMZo0oYIZizjgG8enZBM_pxKzITXMsidQL4eWDQa0MpGGUqIE-Ihxey76GrndSuY2HXdcfIgI.mp4',
+      title: 'Tältliv', time: '3 tim sedan', tags: ['Friluft'],
+      products: [ { brand: 'Stabilotherm', name: 'Vaffeljärn Älg', price: '399 kr', img: 'mat.webp' } ] },
+    { src: 'SnapInsta.to_AQPu0MsM9SpjJjELuKtq-S9H2kJ8j-GqlNDgjrr-oTTavF-3ZjL-lPvo3PADQmqzqZwKVhO1hFWnIan3E1qis-ob0Oy3C36Q4MjCGKY.mp4',
+      title: 'Ut på tur', time: '4 tim sedan', tags: ['Friluft'], products: [] },
+  ];
+
+  const viewport   = document.getElementById('videoViewport');
+  const shortsFeed = document.getElementById('shortsFeed');
+  const shortsInfo = document.getElementById('shortsInfo');
+  const siTitle    = document.getElementById('siTitle');
+  const siTime     = document.getElementById('siTime');
+  const siTags     = document.getElementById('siTags');
+  const shopAllBtn = document.getElementById('shopAllBtn');
+  const navUp      = document.getElementById('navUp');
+  const navDown    = document.getElementById('navDown');
+  const muteBtn    = document.getElementById('muteBtn');
+  const moreBtn    = document.getElementById('moreBtn');
+  const railMenu   = document.getElementById('railMenu');
+  const vpCardWrap = document.getElementById('vpCardWrap');
+  const vpCard     = document.getElementById('vpCard');
+  const shopPanel  = document.getElementById('shopPanel');
+  const shopPanelRow = document.getElementById('shopPanelRow');
+  const panelToggle  = document.getElementById('panelToggle');
+  const shopScrim  = document.getElementById('shopScrim');
+  const closeX     = document.getElementById('closeX');
+  const toast      = document.getElementById('toast');
+
+  let currentIndex = 0;
+  let isMuted = true;
+  let feed = [];
+  let toastTimer;
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function addBatch() {
+    let batch = shuffle(videos);
+    const lastInFeed = feed.length > 0 ? feed[feed.length - 1].src : null;
+    if (batch[0].src === lastInFeed) {
+      const swapIdx = batch.findIndex((v, i) => i > 0 && v.src !== lastInFeed);
+      if (swapIdx > 0) [batch[0], batch[swapIdx]] = [batch[swapIdx], batch[0]];
+    }
+    batch.forEach(v => {
+      const idx = feed.length;
+      feed.push(v);
+      const slide = document.createElement('div');
+      slide.className = 'video-slide';
+      slide.innerHTML = `
+        <div class="video-card">
+          <video src="${v.src}" muted playsinline preload="${idx < 2 ? 'auto' : 'metadata'}"></video>
+          <div class="video-gradient"></div>
+          <div class="video-progress"><div class="video-progress-track"><div class="video-progress-fill"></div></div></div>
+        </div>`;
+      viewport.appendChild(slide);
+      observer.observe(slide);
+      const vid = slide.querySelector('video');
+      vid.addEventListener('ended', () => {
+        if (shortsFeed.classList.contains('panel-open')) { vid.currentTime = 0; vid.play().catch(() => {}); return; }
+        goToSlide(idx + 1);
+      });
+    });
+  }
+
+  function goToSlide(index) {
+    if (index >= feed.length - 2) addBatch();
+    if (index < 0 || index >= feed.length) return;
+    viewport.querySelectorAll('.video-slide')[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+        const slides = Array.from(viewport.querySelectorAll('.video-slide'));
+        const idx = slides.indexOf(entry.target);
+        if (idx !== -1 && idx !== currentIndex) { currentIndex = idx; onSlideChange(); }
+      }
+    });
+  }, { root: viewport, threshold: [0.6] });
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+
+  function renderCard(p) {
+    vpCard.innerHTML = `
+      <button class="vp-card-x" aria-label="Lukk">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1l-8 8" stroke="#000" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <div class="vp-card-thumb" ${p.thumbBg ? `style="background:${p.thumbBg}"` : ''}>
+        ${p.img ? `<img src="${p.img}" alt="${escapeHtml(p.name)}">` : ''}
+      </div>
+      <div class="vp-card-col">
+        <span class="vp-card-name">${escapeHtml(p.brand + ' ' + p.name)}</span>
+        ${p.freight ? `<span class="vp-card-freight">${escapeHtml(p.freight)}</span>` : ''}
+        <div class="vp-card-bottom">
+          <span class="vp-card-price">${escapeHtml(p.price)}</span>
+          <button class="vp-card-add">Legg til</button>
+        </div>
+      </div>`;
+  }
+
+  function onSlideChange() {
+    const v = feed[currentIndex];
+    closePanel();
+    closeMenu();
+    vpCardWrap.classList.remove('dismissed');
+    shortsFeed.classList.remove('card-dismissed');
+    shortsFeed.classList.remove('paused');
+
+    shortsInfo.classList.remove('animate');
+    vpCardWrap.classList.remove('animate');
+    void shortsInfo.offsetWidth;
+
+    siTitle.textContent = v.title;
+    siTime.textContent = v.time;
+    siTags.innerHTML = (v.tags || []).map(t => `<span class="tag-chip">${escapeHtml(t)}</span>`).join('');
+
+    const n = v.products ? v.products.length : 0;
+    shortsFeed.classList.toggle('has-product', n === 1);
+    if (n === 1) {
+      shopAllBtn.hidden = true;
+      renderCard(v.products[0]);
+      vpCardWrap.hidden = false;
+      void vpCardWrap.offsetWidth;
+      vpCardWrap.classList.add('animate');
+    } else if (n > 1) {
+      vpCardWrap.hidden = true;
+      shopAllBtn.hidden = false;
+    } else {
+      vpCardWrap.hidden = true;
+      shopAllBtn.hidden = true;
+    }
+    shortsInfo.classList.add('animate');
+
+    if (currentIndex >= feed.length - 3) addBatch();
+
+    const allSlides = viewport.querySelectorAll('.video-slide');
+    allSlides.forEach((slide, i) => {
+      const vid = slide.querySelector('video');
+      if (i === currentIndex) { vid.play().catch(() => {}); vid.muted = isMuted; }
+      else { vid.pause(); vid.currentTime = 0; }
+    });
+  }
+
+  // Click-to-seek on the progress bar, otherwise tap the video to pause/resume
+  viewport.addEventListener('click', (e) => {
+    const bar = e.target.closest('.video-progress');
+    if (bar) {
+      const track = bar.querySelector('.video-progress-track');
+      const rect = track.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const vid = bar.closest('.video-slide')?.querySelector('video');
+      if (vid && vid.duration) vid.currentTime = pct * vid.duration;
+      return;
+    }
+    const vid = e.target.closest('.video-slide')?.querySelector('video');
+    if (!vid) return;
+    if (vid.paused) { vid.play().catch(() => {}); shortsFeed.classList.remove('paused'); }
+    else { vid.pause(); shortsFeed.classList.add('paused'); }
+  });
+  function updateProgress() {
+    viewport.querySelectorAll('.video-slide').forEach((slide) => {
+      const vid = slide.querySelector('video');
+      const fill = slide.querySelector('.video-progress-fill');
+      if (vid && fill && vid.duration) fill.style.width = (vid.currentTime / vid.duration) * 100 + '%';
+    });
+    requestAnimationFrame(updateProgress);
+  }
+  requestAnimationFrame(updateProgress);
+
+  navUp.addEventListener('click', () => goToSlide(currentIndex - 1));
+  navDown.addEventListener('click', () => goToSlide(currentIndex + 1));
+
+  muteBtn.addEventListener('click', () => {
+    isMuted = !isMuted;
+    const vid = viewport.querySelectorAll('.video-slide')[currentIndex]?.querySelector('video');
+    if (vid) vid.muted = isMuted;
+    muteBtn.classList.toggle('muted', isMuted);
+  });
+
+  // ---- Toast + cart ----
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  // ---- Bottom shop panel ----
+  function openPanel() {
+    const v = feed[currentIndex];
+    if (!v.products || v.products.length < 2) return;
+    shopPanelRow.innerHTML = v.products.map(p => `
+      <div class="sp-card">
+        <div class="sp-card-thumb" ${p.thumbBg ? `style="background:${p.thumbBg}"` : ''}>
+          ${p.img ? `<img src="${p.img}" alt="${escapeHtml(p.name)}">` : ''}
+        </div>
+        <div class="sp-card-info">
+          <span class="sp-card-name">${escapeHtml(p.brand + ' ' + p.name)}</span>
+          <span class="sp-card-price">${escapeHtml(p.price)}</span>
+        </div>
+        <button class="sp-card-add">Legg til</button>
+      </div>`).join('');
+    shortsFeed.classList.add('panel-open');
+  }
+  function closePanel() { shortsFeed.classList.remove('panel-open'); }
+
+  shopAllBtn.addEventListener('click', openPanel);
+  panelToggle.addEventListener('click', closePanel);
+  shopScrim.addEventListener('click', closePanel);
+
+  // panel "Legg til"
+  shopPanelRow.addEventListener('click', (e) => {
+    if (e.target.closest('.sp-card-add')) showToast('Lagt i handlekurv');
+  });
+
+  // single card actions
+  vpCard.addEventListener('click', (e) => {
+    if (e.target.closest('.vp-card-add')) { showToast('Lagt i handlekurv'); return; }
+    if (e.target.closest('.vp-card-x')) {
+      vpCardWrap.classList.add('dismissed');
+      shortsFeed.classList.add('card-dismissed');
+      return;
+    }
+  });
+
+  // ---- Context menu (save / share) ----
+  function openMenu() { railMenu.classList.add('open'); }
+  function closeMenu() { railMenu.classList.remove('open'); }
+  moreBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    railMenu.classList.toggle('open');
+  });
+  railMenu.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    if (act === 'save') {
+      moreBtn.classList.toggle('saved');
+      showToast(moreBtn.classList.contains('saved') ? 'Lagret' : 'Fjernet fra lagret');
+    } else if (act === 'share') {
+      navigator.clipboard?.writeText(location.href).catch(() => {});
+      showToast('Lenke kopiert');
+    }
+    closeMenu();
+  });
+  document.addEventListener('click', (e) => {
+    if (!railMenu.contains(e.target) && e.target !== moreBtn && !moreBtn.contains(e.target)) closeMenu();
+  });
+
+  closeX.addEventListener('click', () => { closePanel(); closeMenu(); });
+
+  // ---- wheel / keyboard ----
+  document.addEventListener('wheel', (e) => {
+    if (shortsFeed.classList.contains('panel-open')) {
+      if (e.target.closest('.shop-panel-row')) return; // let the row scroll
+      e.preventDefault();
+      return;
+    }
+    e.preventDefault();
+    viewport.scrollBy({ top: e.deltaY * 2 });
+  }, { passive: false });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (railMenu.classList.contains('open')) { closeMenu(); return; }
+      if (shortsFeed.classList.contains('panel-open')) { closePanel(); return; }
+    }
+    if (shortsFeed.classList.contains('panel-open')) return;
+    if (e.key === 'ArrowDown' || e.key === 'j') goToSlide(currentIndex + 1);
+    if (e.key === 'ArrowUp' || e.key === 'k') goToSlide(currentIndex - 1);
+    if (e.key === 'm') muteBtn.click();
+  });
+
+  // ---- Device toggle ----
+  const btnDesktop = document.getElementById('toggleDesktop');
+  const btnMobile  = document.getElementById('toggleMobile');
+  btnDesktop.addEventListener('click', () => {
+    document.body.classList.remove('mobile-mode');
+    btnDesktop.classList.add('active'); btnMobile.classList.remove('active');
+    closePanel();
+  });
+  btnMobile.addEventListener('click', () => {
+    document.body.classList.add('mobile-mode');
+    btnMobile.classList.add('active'); btnDesktop.classList.remove('active');
+    closePanel();
+  });
+
+  // ---- Init ----
+  addBatch();
+  onSlideChange();
+  const firstVid = viewport.querySelector('.video-slide video');
+  if (firstVid) firstVid.play().catch(() => {});
+})();
+</script>
+
+</body>
+</html>

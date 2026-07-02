@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Widforss — Shorts</title>
+<style>
+  @font-face {
+    font-family: 'Greed Standard';
+    src: url('fonts/GreedStandardTRIAL-Medium.otf') format('opentype');
+    font-weight: 500; font-style: normal; font-display: swap;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: #1F1E1D;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Greed Standard', system-ui, sans-serif;
+  }
+
+  .player {
+    position: relative;
+    height: min(96vh, calc(96vw * (1020 / 574)));
+    aspect-ratio: 574 / 1020;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 24px 80px rgba(0,0,0,.5);
+  }
+
+  /* --- slides --- */
+  .slide {
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity .9s ease;
+    will-change: opacity;
+  }
+  .slide.active { opacity: 1; }
+  .slide .img {
+    position: absolute; inset: -2%;               /* small bleed so edges never show during zoom */
+    background-size: cover; background-position: center;
+    /* continuous, very subtle zoom — always running so switching never snaps (no layout shift) */
+    animation: kenburns 22s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  @keyframes kenburns {
+    from { transform: scale(1.0); }
+    to   { transform: scale(1.045); }
+  }
+  /* keep captions legible on bright frames */
+  .slide::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,.22) 100%);
+  }
+
+  /* --- caption (per-line hugging background) --- */
+  .caption-layer {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 24px;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .caption {
+    max-width: 300px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .5s ease .2s, transform .5s ease .2s;
+  }
+  .caption span {
+    /* the clone breaks the padded background across each wrapped line */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    background: #42541F;
+    color: #fff;
+    font-size: 32px;
+    line-height: 1.32;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+  <div class="player" id="player">
+    <div class="stage" id="stage"></div>
+    <div class="caption-layer"><div class="caption" id="caption"><span></span></div></div>
+  </div>
+
+<script>
+  const DUR = 4200; // ms per slide
+
+  const SLIDES = [
+    { img: 'generated/camping.png',            caption: 'Vi har ställt husvagnen på samma äng varje sommar.' },
+    { img: 'generated/4-elgjakt.png',          caption: 'Nu känner hunden skogen bättre än jag.' },
+    { img: 'generated/1-fjall-matpause.png',   caption: 'Vi gick i timmar innan första rasten.' },
+    { img: 'generated/3-sjokant-trebater.png', caption: 'Båtarna har funnits i familjen i tre generationer.' },
+    { img: 'generated/2-leirplass.png',        caption: 'Tältet stod uppe innan solen försvann bakom åsen.' },
+  ];
+
+  const stage = document.getElementById('stage');
+  const caption = document.getElementById('caption');
+  const capSpan = caption.querySelector('span');
+
+  SLIDES.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'slide';
+    el.innerHTML = `<div class="img" style="background-image:url('${s.img}'); animation-delay:${-i * 4}s"></div>`;
+    stage.appendChild(el);
+  });
+
+  const slides = [...stage.children];
+  let idx = -1;
+
+  function show(n) {
+    idx = n;
+    slides.forEach((s, i) => s.classList.toggle('active', i === n));
+    // caption swap
+    caption.style.opacity = 0;
+    caption.style.transform = 'translateY(6px)';
+    setTimeout(() => {
+      capSpan.textContent = SLIDES[n].caption;
+      caption.style.opacity = 1;
+      caption.style.transform = 'translateY(0)';
+    }, 220);
+  }
+
+  function next() { show((idx + 1) % SLIDES.length); }
+  show(0);
+  setInterval(next, DUR);
+</script>
+</body>
+</html>

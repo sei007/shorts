@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Widforss Shorts specs</title>
+<style>
+  @font-face { font-family:'Greed Standard'; src:url('fonts/GreedStandardTRIAL-Regular.otf') format('opentype'); font-weight:400; font-display:swap; }
+  @font-face { font-family:'Greed Standard'; src:url('fonts/GreedStandardTRIAL-Medium.otf') format('opentype'); font-weight:500; font-display:swap; }
+
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+  :root {
+    --olive:#3D4B19; --ink:#151515; --black:#000; --divider:#EEEEEE; --white:#fff;
+    --nav-font:'Greed Standard','Helvetica Neue',Arial,sans-serif;
+    --ui-font:ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+
+  html,body { background:#fff; color:#1a1a1a; font-family:var(--ui-font); -webkit-font-smoothing:antialiased; }
+  body { padding:56px 0 200px; }
+  a { color:inherit; text-decoration:none; }
+
+  .wrap { width:max-content; min-width:100%; padding:0 80px; }
+  .head { max-width:760px; margin-bottom:8px; }
+  .head h1 { font-size:60px; font-weight:600; letter-spacing:-0.025em; }
+  .head p { margin-top:14px; font-size:15px; line-height:1.6; color:#777; }
+
+  .frame-block { margin-top:110px; }
+  .frame-block:first-of-type { margin-top:56px; }
+  .label { font-size:19px; font-weight:600; letter-spacing:-0.01em; color:#1a1a1a; margin-bottom:18px; }
+  .label .n { color:var(--olive); margin-right:10px; font-weight:700; }
+  .cap { font-size:11px; color:#bbb; margin-top:10px; font-family:ui-monospace,Menlo,monospace; }
+  .canvas { display:inline-block; background:#fff; box-shadow:0 1px 0 #e6e6e3, 0 0 0 1px #ececec, 0 22px 50px -30px rgba(0,0,0,.25); }
+  .pending { display:inline-block; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:#b06a00; background:#fff3e0; padding:4px 10px; border-radius:20px; }
+
+  /* ===================== "Klipp fra dere" — entry module ===================== */
+  .km-frame { position:relative; width:1427px; height:744px; background:#fff; font-family:var(--nav-font); overflow:hidden; }
+
+  .km-title { position:absolute; top:129px; left:35px; display:flex; align-items:center; gap:14px;
+    font-weight:500; font-size:36px; line-height:1.15; color:#000; }
+  .km-title svg { display:block; }
+
+  /* Slider arrows — reused verbatim from Dealspage/widforss.html (live-site spec) */
+  .km-nav { position:absolute; top:112px; right:39px; display:flex; gap:9px; }
+  .dp-arrow { width:45px; height:45px; display:inline-flex; align-items:center; justify-content:center;
+    background:#fff; border:1px solid rgb(0 0 0 / 5%); border-radius:6px; cursor:pointer; color:#000;
+    transition:border-color 200ms ease; }
+  .dp-arrow:hover { border-color:rgb(0 0 0 / 50%); }
+  .dp-arrow svg { width:10px; height:8px; display:block; }
+  .dp-arrow[data-dir="prev"] svg { transform:scaleX(-1); }
+
+  .km-row { position:absolute; top:217px; left:36px; display:flex; gap:24px; }
+  .km-card { position:relative; width:318px; height:399px; border-radius:12px; overflow:hidden; display:block;
+    background:#111; cursor:pointer; }
+  .km-card img, .km-card video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .km-card video { opacity:0; transition:opacity .25s ease; }   /* generated image poster; clip fades in on hover */
+  .km-card:hover video { opacity:1; }
+  .km-card-grad { position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.92) 100%); }
+  .km-card-name { position:absolute; left:17px; right:17px; bottom:18px;
+    font-weight:500; font-size:28px; line-height:1.12; color:#fff; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="head">
+    <h1>Widforss Shorts specs</h1>
+    <p>Handoff for the shoppable shorts feed. Specs (redlines, tokens, states) land here soon —
+       this first block is the clickable entry module that leads into the feed.</p>
+  </div>
+
+  <!-- ===== 01 · Entry module ===== -->
+  <div class="frame-block">
+    <div class="label"><span class="n">01</span> «Klipp från er» · entry module · <span class="pending">placeholder media</span> · hover a card to preview · click to open the feed</div>
+    <div class="canvas">
+      <div class="km-frame">
+
+        <h2 class="km-title">Klipp från er
+          <svg width="13" height="16" viewBox="0 0 13 16" fill="none"><path d="M1 1.5L12 8L1 14.5V1.5Z" fill="#000"/></svg>
+        </h2>
+
+        <div class="km-nav">
+          <button class="dp-arrow" data-dir="prev" aria-label="Föregående">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true" focusable="false"><path d="M0.713888 3.69231L8.25235 3.69231L5.02158 0.461538L5.42773 -1.74846e-07L9.42773 4L5.42773 8L5.02158 7.53846L8.25235 4.30769L0.713888 4.30769L0.713888 3.69231Z" fill="currentColor"></path></svg>
+          </button>
+          <button class="dp-arrow" data-dir="next" aria-label="Nästa">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true" focusable="false"><path d="M0.713888 3.69231L8.25235 3.69231L5.02158 0.461538L5.42773 -1.74846e-07L9.42773 4L5.42773 8L5.02158 7.53846L8.25235 4.30769L0.713888 4.30769L0.713888 3.69231Z" fill="currentColor"></path></svg>
+          </button>
+        </div>
+
+        <div class="km-row" id="kmRow">
+          <a class="km-card" href="index-v2.html">
+            <img src="generated/camping.png" alt="">
+            <video src="SnapInsta.to_AQMvRqrxCp1k3C1N975d91bavqYCYKMBul9Kktj2yqpILzdCkufZH_Ks_FaeOseu6n3sbgnOE8ucXplwSB28y7v3GuKJL3mRiAfmccc.mp4" muted loop playsinline preload="none"></video>
+            <div class="km-card-grad"></div>
+            <div class="km-card-name">Maria &amp; Lewis</div>
+          </a>
+          <a class="km-card" href="index-v2.html">
+            <img src="generated/4-elgjakt.png" alt="">
+            <video src="SnapInsta.to_AQP9ZDSEZS3pE4-mPx2REq79l4nIFBL9fHAd70lai536YfaIbi4wvZfw7Yi63NRpjXN9aIwYYYp_aCoZC61In5Xb6XRZxK7E2jAO-QU.mp4" muted loop playsinline preload="none"></video>
+            <div class="km-card-grad"></div>
+            <div class="km-card-name">Hunden känner skogen bäst</div>
+          </a>
+          <a class="km-card" href="index-v2.html">
+            <img src="generated/1-fjall-matpause.png" alt="">
+            <video src="SnapInsta.to_AQNAA6XSsiZrXgJPMYQEaiN7rcK7bvE5r8A04hu2z5EyID9HhnVrFcC3kzs4ZTWhEhN50zNfcbYhp3ehYATYPSq9oN7ZLS7pXuvZ3b4.mp4" muted loop playsinline preload="none"></video>
+            <div class="km-card-grad"></div>
+            <div class="km-card-name">Anna &amp; Johan</div>
+          </a>
+          <a class="km-card" href="index-v2.html">
+            <img src="generated/3-sjokant-trebater.png" alt="">
+            <video src="SnapInsta.to_AQOXPGgcx70qtQNQ9pjM5Hc0mL6XLphl9_5AXEXz4E7NEPraInD-vHxiaZuNC-JvvC3kzDT5_gla2Xvs9ROfXjQNs7WpQk7bypZQiJk.mp4" muted loop playsinline preload="none"></video>
+            <div class="km-card-grad"></div>
+            <div class="km-card-name">Tre generationers båtliv</div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+    <div class="cap">frame 1427×744 · cards 318×399 r12 · gap 24 · title Greed Medium 36/115% · names Greed Medium 28 · gradient transparent→#000</div>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.km-card').forEach(card => {
+    const v = card.querySelector('video');
+    if (!v) return;
+    card.addEventListener('mouseenter', () => { v.currentTime = 0; v.play().catch(() => {}); });
+    card.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
+  });
+</script>
+
+</body>
+</html>
