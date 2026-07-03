@@ -484,7 +484,7 @@
   const spCards = [[P.boot,'Crispi Summit GTX','4 299 kr'],[P.cap,'Härkila Trucker Caps','349 kr'],[P.jacket,'Härkila Pro Hunter GTX','8 999 kr']];
   function shopPanel(ix, full){
     const a=(cls,key)=> ix ? `class="${cls} ix" data-k="${key}"` : `class="${cls}"`;
-    return `<div class="shop-panel"${full?' style="width:100%"':''}>
+    return `<div ${ix?'class="shop-panel ix" data-k="panel"':'class="shop-panel"'}${full?' style="width:100%"':''}>
       <div class="shop-panel-head"><span ${a('shop-panel-title','title')}>Shop the products</span>
         <span ${a('shop-panel-toggle','toggle')}>${ico('ic-chevron',16,9,'#000')}</span></div>
       <div class="shop-panel-row">${spCards.map((c,i)=>`<div ${i?'class="sp-card"':a('sp-card','card')}><div ${i?'class="sp-card-thumb"':a('sp-card-thumb','thumb')}><img src="${c[0]}" alt=""></div><div class="sp-card-info"><span ${i?'class="sp-card-name"':a('sp-card-name','name')}>${c[1]}</span><span ${i?'class="sp-card-price"':a('sp-card-price','price')}>${c[2]}</span></div><button ${i?'class="sp-card-add"':a('sp-card-add','add')}>Legg til</button></div>`).join('')}</div>
@@ -501,7 +501,7 @@
   }
   const buildC3 = () => `<div class="mock" style="padding:40px;background:var(--bg);border-radius:16px;display:inline-block">${railMenuHTML(false)}</div>`;
   /* menu emanates from the ⋯ (dots at ~y585, pill left 972) — mirror index-v2's right:53 / top:center+36 */
-  const octxMenu = () => `<div class="octx mock" style="width:1440px">${playerDesktop(false,false)}<div class="octx-scrim"></div><div class="octx-fg" style="right:480px;top:560px">${railMenuHTML(true)}</div></div>`;
+  const octxMenu = () => `<div class="octx mock" style="width:1440px">${playerDesktop(false,false)}<div class="octx-scrim"></div><div class="octx-fg" style="right:480px;top:544px">${railMenuHTML(true)}</div></div>`;
 
   /* ---------- redline primitives (measured live) ---------- */
   function rel(c,el){const a=c.getBoundingClientRect(),b=el.getBoundingClientRect();return{l:b.left-a.left,t:b.top-a.top,r:b.right-a.left,b:b.bottom-a.top,w:b.width,h:b.height,cx:(b.left+b.right)/2-a.left,cy:(b.top+b.bottom)/2-a.top};}
