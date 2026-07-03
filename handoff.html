@@ -52,15 +52,15 @@
   /* section + frame headings */
   .section-head { margin-top:160px; }
   .section-head:first-of-type { margin-top:96px; }
-  .section-head h2 { font-size:24px; font-weight:600; letter-spacing:-0.01em; }
-  .section-head p { margin-top:8px; font-size:14px; line-height:1.6; color:var(--body-c); max-width:60ch; }
-  .frame-block { margin-top:96px; }
-  .section-head + .frame-block { margin-top:48px; }
-  .label { display:flex; align-items:baseline; gap:12px; margin-bottom:24px; }
-  .label .n { font:600 13px var(--mono); color:var(--meta); }
-  .label .t { font-size:14px; font-weight:600; color:var(--ink); }
-  .label .tag { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--meta); }
-  .cap { margin-top:16px; font:13px/1.5 var(--mono); color:var(--body-c); }
+  .section-head h2 { font-size:34px; font-weight:600; letter-spacing:-0.02em; line-height:1.1; }
+  .section-head p { margin-top:12px; font-size:15px; line-height:1.6; color:var(--body-c); max-width:60ch; }
+  .frame-block { margin-top:88px; }
+  .section-head + .frame-block { margin-top:56px; }
+  /* frame heading — ONE size, ONE weight; number + mode differ by colour only */
+  .label { display:flex; align-items:baseline; gap:14px; margin-bottom:20px; font-size:22px; font-weight:600; letter-spacing:-0.015em; }
+  .label .n { color:var(--meta); }
+  .label .t { color:var(--ink); }
+  .label .mode { color:var(--meta); }
   .canvas { display:inline-block; background:#fff; }
   .canvas.dark { background:var(--bg); }
 
@@ -69,7 +69,8 @@
   .inspect .ix { cursor:pointer; }
   .inspect .ix:hover { outline:1.5px solid var(--accent); outline-offset:1px; }
   .inspect .ix.sel { outline:2px solid var(--accent); outline-offset:1px; }
-  .frame-note { margin-top:16px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  /* link + context sits right under the frame heading, above the canvas */
+  .frame-note { margin:0 0 28px; display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
   .frame-hint { font-size:14px; line-height:1.5; color:var(--body-c); max-width:640px; }
   .spec-bar { margin-top:24px; }
   .spec-panel { width:420px; max-width:100%; margin-top:12px; background:var(--panel); border-radius:12px; padding:20px 24px; font-family:var(--ui-font); }
@@ -81,7 +82,7 @@
   .spec-row .k { flex:none; font-size:14px; color:var(--body-c); }
   .spec-row .v { font:500 13px var(--mono); color:var(--ink); text-align:right; }
   .spec-row .sw { display:inline-block; width:12px; height:12px; border-radius:3px; border:1px solid rgba(0,0,0,.12); vertical-align:-1.5px; margin-right:7px; }
-  .spec-panel .sp-note { margin-top:12px; padding-top:12px; border-top:1px solid #E3E3DD; font-size:14px; line-height:1.55; color:var(--body-c); }
+  .spec-panel .sp-note { margin-top:12px; padding-top:12px; border-top:1px solid #E3E3DD; font-size:14px; line-height:1.55; color:var(--body-c); white-space:pre-line; }
   .sp-group { padding-top:16px; }
   .sp-group:first-child { padding-top:0; }
   .sp-group + .sp-group { margin-top:8px; border-top:2px solid #DBDBD4; }
@@ -367,7 +368,7 @@
     x:{name:'Dismiss (×)', rows:[['Size','16 × 16'],['Opacity','.6 → 1'],['Position','top 14 · right 14']]}
   };
   const SPEC_C2 = {
-    panel:{name:'Shop panel', rows:[['Background','#FFFFFF',1],['Padding','26 · clamp(40,4.3vw,74) · 30'],['Enter','translateY 100%→0'],['Max-height','56% (mobile 62%)'],['Z','60 · above rail']], note:'Scrim behind: #000 @ .55, z 56 — dims video + chrome. Click scrim closes.'},
+    panel:{name:'Shop panel', rows:[['Background','#FFFFFF',1],['Padding','26 · clamp(40,4.3vw,74) · 30'],['Heading margin-top','26px (padding)'],['Enter','translateY 100%→0'],['Max-height','56% (mobile 62%)'],['Z','60 · above rail']], note:'Slides up from the bottom; the rest blurs behind (backdrop-filter 20px). Click outside to close.\nMobile: panel is full-width, 20px left padding, cards 282 wide in a full-bleed horizontal swipe row — card 1 aligns with the heading, card 2 peeks.'},
     title:{name:'“Shop the products”', rows:[['Font',FAM+' Medium'],['Size','16px'],['Color','#000',1],['Margin-bottom','20px']]},
     toggle:{name:'Collapse chevron', rows:[['Icon','16 × 9 · stroke 1.6'],['Opacity','.7 → 1']]},
     card:{name:'Product card', rows:[['Size','302 × 94 (mobile 282)'],['Border','1px #DBDBDB',1],['Radius','12px'],['Padding','16 · 16 · 16 · 17'],['Gap','11px'],['Row gap','16px']]},
@@ -496,7 +497,8 @@
     </div>`;
   }
   const buildC3 = () => `<div class="mock" style="padding:40px;background:var(--bg);border-radius:16px;display:inline-block">${railMenuHTML(false)}</div>`;
-  const octxMenu = () => `<div class="octx mock" style="width:1440px">${playerDesktop(false,false)}<div class="octx-scrim"></div><div class="octx-fg" style="right:470px;top:498px">${railMenuHTML(true)}</div></div>`;
+  /* menu emanates from the ⋯ (dots at ~y585, pill left 972) — mirror index-v2's right:53 / top:center+36 */
+  const octxMenu = () => `<div class="octx mock" style="width:1440px">${playerDesktop(false,false)}<div class="octx-scrim"></div><div class="octx-fg" style="right:480px;top:560px">${railMenuHTML(true)}</div></div>`;
 
   /* ---------- redline primitives (measured live) ---------- */
   function rel(c,el){const a=c.getBoundingClientRect(),b=el.getBoundingClientRect();return{l:b.left-a.left,t:b.top-a.top,r:b.right-a.left,b:b.bottom-a.top,w:b.width,h:b.height,cx:(b.left+b.right)/2-a.left,cy:(b.top+b.bottom)/2-a.top};}
@@ -548,7 +550,12 @@
     const th=one(c,'.vp-card-thumb'); if(th){ hdim(c,th.b+8,th.l,th.r,R(th.w)); band(c,card.l,th.l,th.cy-10,th.cy+10,R(th.l-card.l)); band(c,th.r,one(c,'.vp-card-col').l,th.cy-10,th.cy+10,R(one(c,'.vp-card-col').l-th.r)); }
   }
   function spC2(c){
-    const card=Q(c,'.sp-card'); if(!card.length) return;
+    const panel=one(c,'.shop-panel'), title=one(c,'.shop-panel-title'), card=Q(c,'.sp-card');
+    if(!card.length) return;
+    if(panel&&title){
+      band(c, title.l, title.l+40, panel.t, title.t, R(title.t-panel.t));   // white panel top → heading (26)
+      band(c, title.l, title.l+40, title.b, card[0].t, R(card[0].t-title.b)); // heading → cards row (20)
+    }
     hdim(c,card[0].t-14,card[0].l,card[0].r,R(card[0].w)); vdim(c,card[0].l-14,card[0].t,card[0].b,R(card[0].h),'left');
     for(let i=0;i<card.length-1;i++) band(c,card[i].r,card[i+1].l,card[i].t,card[i].b,R(card[i+1].l-card[i].r));
     const th=one(c,'.sp-card-thumb'); if(th) hdim(c,th.b+7,th.l,th.r,R(th.w));
@@ -616,12 +623,11 @@
     const canvas = `<div class="canvas${dk}"><div class="inspect" id="insp-${s.id}">${ib()}</div></div>`;
     const note = (s.link||s.note) ? `<div class="frame-note">${s.link?`<a class="frame-link" href="${s.link.href}">${s.link.label}</a>`:''}${s.note?`<span class="frame-hint">${s.note}</span>`:''}</div>` : '';
     const speccol = `<div class="spec-bar"><button class="show-all" data-wrap="insp-${s.id}" data-panel="panel-${s.id}" data-spec="${s.spec}">Show all specs</button></div><div class="spec-panel" id="panel-${s.id}"><div class="spec-empty">Click any element for its spec · or “Show all specs”.</div></div>`;
-    const label = `<div class="label"><span class="n">${s.n}</span><span class="t">${s.title}</span><span class="tag">Inspect</span></div>`;
-    const cap = s.cap?`<div class="cap">${s.cap}</div>`:'';
+    const label = `<div class="label"><span class="n">${s.n}</span><span class="t">${s.title}</span><span class="mode">Inspect</span></div>`;
     const inspectBlock = s.side
-      ? `<div class="frame-block">${label}<div class="inspect-row"><div class="col-l">${canvas}${note}</div><div class="col-r">${speccol}</div></div>${cap}</div>`
-      : `<div class="frame-block">${label}${canvas}${note}${speccol}${cap}</div>`;
-    const spacingBlock = `<div class="frame-block"><div class="label"><span class="n">${s.n}s</span><span class="t">${s.title}</span><span class="tag">Spacing</span></div><div class="canvas${dk}"><div class="spacing desat" id="spac-${s.id}">${s.build()}</div></div><div class="cap">redline · measured live from the rendered DOM</div></div>`;
+      ? `<div class="frame-block">${label}${note}<div class="inspect-row"><div class="col-l">${canvas}</div><div class="col-r">${speccol}</div></div></div>`
+      : `<div class="frame-block">${label}${note}${canvas}${speccol}</div>`;
+    const spacingBlock = `<div class="frame-block"><div class="label"><span class="n">${s.n}s</span><span class="t">${s.title}</span><span class="mode">Spacing</span></div><div class="canvas${dk}"><div class="spacing desat" id="spac-${s.id}">${s.build()}</div></div></div>`;
     return inspectBlock + spacingBlock;
   }
 
