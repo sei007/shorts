@@ -108,6 +108,9 @@
   .dim-lbl { position:absolute; z-index:6; transform:translate(-50%,-50%); background:var(--accent); color:#fff; font:600 12px/1 var(--mono); padding:4px 6px; border-radius:4px; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.2); }
 
   /* ============ MOTION spec table ============ */
+  .motion-group { margin-top:44px; }
+  .motion-group:first-child { margin-top:0; }
+  .motion-group h4 { font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--meta); margin-bottom:18px; }
   .motion-grid { display:flex; flex-wrap:wrap; gap:16px; max-width:1100px; }
   .motion-card { width:340px; border:1px solid var(--line); border-radius:12px; padding:18px 20px; background:#fff; }
   .motion-card h3 { font-size:14px; font-weight:600; color:var(--ink); margin-bottom:6px; }
@@ -149,8 +152,8 @@
 
   /* --- Shorts player (mirrored from index-v2) --- */
   .player { position:relative; font-family:'Greed Standard', system-ui, sans-serif; color:#000; }
-  /* 1:1 with index-v2 on a 1440×1024 viewport: header 67 → content-area 957; video = min(1021, 100vh−250) = 774,
-     centred in the content-area so the real gap from the top nav to the video (≈91px) is visible. */
+  /* 1:1 with index-v2 at 1440×1024: header 67 + sep 1 → content-area 876; video = min(1021, 100vh−250) = 774,
+     centred so the gap above/below the video is the real, constant 51px (see the video spec — the video is NOT a set size). */
   .player.desktop { width:1440px; --video-h:774px; --video-w:calc(var(--video-h) * 0.5622); }
   .player.mobile { width:390px; --video-h:768px; --video-w:390px; }
 
@@ -185,7 +188,7 @@
 
   /* content area / video */
   .content-area { position:relative; overflow:hidden; }
-  .player.desktop .content-area { height:957px; }
+  .player.desktop .content-area { height:876px; }   /* 1024vh − frame 80 − header 67 − sep 1 → video gap 51px each side */
   .player.mobile .content-area { height:768px; }
   .close-x { position:absolute; top:18px; right:26px; z-index:20; width:40px; height:40px; border-radius:50%; background:var(--rail-pill); border:none; display:flex; align-items:center; justify-content:center; }
   .player.mobile .close-x { top:14px; right:14px; }
@@ -337,7 +340,7 @@
   const SPEC_B1 = {
     /* Site header (Widforss nav) is static here — it is specced in ../Shop-in-Shop/handoff.html */
     close:{name:'Close (×)', rows:[['Size','40 × 40'],['Background','#292926',1],['Radius','50%'],['Icon','14 × 14 · stroke 2 #fff'],['Position','top 18 · right 26']]},
-    video:{name:'Video', rows:[['Aspect','574 : 1021 (0.5622)'],['Radius','12px'],['Object-fit','cover'],['Bottom gradient','0→#000 · 55→100% @ .6']], note:'Placeholder still shown. First clip = klipp-fran-er.mp4 (baked captions). Advances on ended; scroll-snap Y between clips.'},
+    video:{name:'Video (responsive)', rows:[['Aspect','574 : 1021 (0.5622) — fixed'],['Height','min(1021px, 100vh − 250px)'],['Width','height × 0.5622 (derived)'],['Placement','centred in content-area'],['Gap ↑↓','51px each — constant'],['Radius','12px'],['Object-fit','cover'],['Bottom gradient','0→#000 · 55→100% @ .6']], note:'The video is NOT a set size. Only the 574:1021 aspect is fixed. Height scales with the viewport (min(1021, 100vh−250)); width is derived from the height; it stays centred with a constant 51px gap above and below (the mock is frozen at 1440×1024 = 774×435). object-fit:cover, so a clip fills the frame; the poster still shown here stands in for the real playing clip. First clip = klipp-fran-er.mp4 (baked captions); the feed auto-advances when a clip ends.'},
     progress:{name:'Progress bar', rows:[['Position','bottom 20'],['Height','5px'],['Inset','left/right 17'],['Track','#474746',1],['Fill','#C5CEB7',1],['Radius','16px']], note:'Click to seek. Tapping the video (not the bar) pauses/resumes.'},
     siTitle:{name:'Clip title', rows:[['Font',FAM+' Medium'],['Size','36px'],['Line height','1.15'],['Color','#FFFFFF',1],['Max-width','280px'],['Position','left clamp(40,4.3vw,81) · top 33%']]},
     siTime:{name:'Timestamp', rows:[['Font',FAM+' Medium'],['Size','18px'],['Color','#919191',1],['Margin-top','6px']]},
@@ -604,7 +607,7 @@
   const SCREENS = [
     { id:'a1', n:'01', title:'«Klipp från er» · entry · desktop', spec:'A1', build:buildA1, spacing:spA1, link:{href:'start.html', label:'Open live module ↗'}, note:'Each card shows a poster still; hovering a card plays its clip (muted, looping). Try it in the live module.', cap:'frame 1427×744 · cards 318×400 r12 · gap 24 · title→cards 48 · title Greed Medium 36/115% · names Greed Medium 28' },
     { id:'a2', n:'02', title:'«Klipp från er» · entry · mobile', spec:'A2', build:buildA2, spacing:spA2, cap:'frame 410×504 · cards 260×324 r12 · gap 12 · left 19 · title Greed Medium 28 · names Greed Medium 24' },
-    { id:'b1', n:'03', title:'Shorts player · desktop', spec:'B1', build:buildB1, spacing:spB1, dark:true, side:true, link:{href:'index-v2.html', label:'Open live player ↗'}, note:'1:1 with index-v2 on a 1440×1024 viewport, so the real gap from the top nav to the video is visible. The Widforss nav is static (specced in the Shop-in-Shop handoff). Video shown as a still.', cap:'header 67 → video ≈91 · video 574:1021 · info left 62' },
+    { id:'b1', n:'03', title:'Shorts player · desktop', spec:'B1', build:buildB1, spacing:spB1, dark:true, side:true, link:{href:'index-v2.html', label:'Open live player ↗'}, note:'Frozen 1:1 with index-v2 at 1440×1024. The video is responsive (not a set size) — it scales with the viewport and stays centred with a constant 51px gap above/below; see the Video spec. The Widforss nav is static (specced in the Shop-in-Shop handoff). Poster still stands in for the playing clip.', cap:'header 67 → video 51 gap · video 574:1021 · info left 62' },
     { id:'b2', n:'04', title:'Shorts player · mobile', spec:'B2', build:buildB2, spacing:spB2, dark:true, side:true, link:{href:'index-v2.html?view=mobile', label:'Open live player ↗'}, cap:'full-bleed video · info bottom 56 · left 20 · rail right 14' },
     { id:'c1', n:'05', title:'Overlay · single-product card', spec:'C1', build:buildC1, inspectBuild:octxCard, spacing:spC1, side:true, cap:'in context · everything else blurred · card 330×150 r12 · thumb 90×115' },
     { id:'c2', n:'06', title:'Overlay · “Shop the products” panel', spec:'C2', build:buildC2, inspectBuild:octxPanel, spacing:spC2, side:true, cap:'in context · everything else blurred · cards 302×94 r12 · gap 16' },
@@ -653,7 +656,39 @@
   }
   const ICONS_HTML = `<div class="section-head"><h2>Icons</h2></div><div class="frame-block"><div class="label"><span class="n">10</span><span class="t">Icon set · click to download the SVG</span></div><div class="icon-grid" id="iconGrid"></div></div>`;
 
-  const MOTION = `<div class="section-head"><h2>Motion</h2><p>Animation tokens from index-v2.html. Durations in seconds, easings as cubic-bezier.</p></div>
+  const mCard = m => `<div class="motion-card"><h3>${m[0]}</h3><div class="mono"><b>${m[1]}</b></div><div class="mono val" style="margin-top:6px">${m[2]}</div><div class="mono">${m[3]}</div></div>`;
+  const MGROUPS = [
+    ['Entry module «Klipp från er»', [
+      ['Card hover — desktop','poster still → clip fades in & plays','opacity 0→1 · 0.25s ease','muted + looping; mouseleave pauses and resets to the poster'],
+      ['Card tap — mobile','static poster (no hover)','tap → opens the feed','hover-to-play is desktop-only'],
+      ['Slider arrows','joined pill · slide-on-hover','icons swap 0.20s ease','step one card; each half disables at the track end']
+    ]],
+    ['Feed navigation', [
+      ['Arrows / auto-advance','scrollIntoView · smooth · snap-center','—','a clip auto-advances to the next when it ends'],
+      ['Mousewheel / swipe','wheel scrolls the viewport (deltaY ×2)','scroll-snap Y · mandatory','snaps to the nearest clip; IntersectionObserver ≥0.6 sets the active one'],
+      ['Active-clip swap','current plays (muted per state)','others pause + reset to 0s','info column + product card re-animate on every change'],
+      ['Tap video to pause','pause-indicator scale .8→1 + fade','0.28s · overshoot','tap again resumes'],
+      ['Progress bar','click anywhere to seek','fill tracks currentTime (rAF)','5px track, inset 17, bottom 20']
+    ]],
+    ['Info column & product', [
+      ['Info (title / time / tags)','fadeUp — translateY(14→0) + opacity','0.50–0.55s · expo-out','stagger 0 / .07 / .14s (Shop-all +.20)'],
+      ['Single-product card — pop','cardIn — translateY(16)+scale(.97) → 0/1','0.55s · overshoot · delay .18s','“Produkt fra video:” label fadeUp, delay .10s'],
+      ['Dismiss card (×) — desktop','card fades + translateY(24) out','0.45s · expo-out','info column stays anchored to the video'],
+      ['Dismiss card (×) — mobile','info column slides DOWN','bottom 234→56 · 0.50s expo-out','title sits 28px above the card; drops to 56px above the controls once dismissed'],
+      ['Mute toggle','swaps sound ⇄ muted icon','instant · on .muted','feed starts muted']
+    ]],
+    ['Overlays', [
+      ['“Shop the products” panel','slides up — translateY(100% → 0)','0.55s · expo-out','video nudges up 48px (mobile 40); scrim → .55 · 0.45s'],
+      ['Shop-panel cards','fadeUp','0.50s · expo-out','stagger .18 / .26 / .34 / .42s'],
+      ['Context menu (⋯)','translateX(8)+scale(.96) → 0/1','0.20s · expo-out','origin right center; outside-click closes']
+    ]],
+    ['Feedback', [
+      ['Toast','translateY(14 → 0) + opacity','0.25 / 0.35s · overshoot','auto-hides after 1.8s'],
+      ['Rail arrow — press','scale(.92) active','0.10s','tactile'],
+      ['Rail pill icon — hover','scale(1.1) + opacity → 1','0.20s · expo-out','Lagre (heart) fills green when saved']
+    ]]
+  ];
+  const MOTION = `<div class="section-head"><h2>Motion &amp; interactions</h2><p>The full set of interactions and transitions in the prototype — hover, tap, scroll, and every animated state. Nothing here is decorative; build these to match. Durations in seconds, easings below.</p></div>
     <div class="frame-block"><div class="label"><span class="n">08</span><span class="t">Easing tokens</span></div>
     <div class="motion-grid">
       ${[['--ease-standard','cubic-bezier(0.25, 0, 0.15, 1)','UI fades, background/opacity'],
@@ -662,19 +697,9 @@
          ['--ease-smooth-decel','cubic-bezier(0.25, 0.46, 0.45, 0.94)','decelerated moves']
         ].map(m=>`<div class="motion-card"><h3>${m[0]}</h3><div class="mono val">${m[1]}</div><div class="motion-demo"><i style="animation-timing-function:${m[1]}"></i></div><div class="mono">${m[2]}</div></div>`).join('')}
     </div></div>
-    <div class="frame-block"><div class="label"><span class="n">09</span><span class="t">Component animations</span></div>
-    <div class="motion-grid">
-      ${[['Info column (title/time/tags)','fadeUp — translateY(14→0) + opacity','0.50–0.55s · expo-out','staggered 0 / .07 / .14 / .20s'],
-         ['Shop-all button','fadeUp','0.50s · overshoot','delay .20s'],
-         ['Single-product card','cardIn — translateY(16)+scale(.97) → 0/1','0.55s · overshoot','delay .18s'],
-         ['“Shop the products” panel','translateY(100% → 0)','0.55s · expo-out','scrim opacity → .55 · 0.45s standard'],
-         ['Shop-panel cards','fadeUp','0.50s · expo-out','stagger .18 / .26 / .34 / .42s'],
-         ['Context menu (⋯)','translateX(8)+scale(.96) → 0/1','0.20s · expo-out','transform-origin right center'],
-         ['Toast','translateY(14 → 0) + opacity','0.25 / 0.35s · overshoot','auto-hides'],
-         ['Clip → clip','scroll-snap Y · smooth','—','advances on video end'],
-         ['Rail button press','scale(.92) active','0.10s','tactile feedback']
-        ].map(m=>`<div class="motion-card"><h3>${m[0]}</h3><div class="mono"><b>${m[1]}</b></div><div class="mono val" style="margin-top:6px">${m[2]}</div><div class="mono">${m[3]}</div></div>`).join('')}
-    </div></div>`;
+    <div class="frame-block"><div class="label"><span class="n">09</span><span class="t">Interactions &amp; animation</span></div>
+      ${MGROUPS.map(g=>`<div class="motion-group"><h4>${g[0]}</h4><div class="motion-grid">${g[1].map(mCard).join('')}</div></div>`).join('')}
+    </div>`;
 
   const root = document.getElementById('sections');
   root.innerHTML = SECTIONS.map(sec=>`<div class="section-head"><h2>${sec.h}</h2></div>${sec.ids.map(id=>frameBlocks(byId[id])).join('')}`).join('') + MOTION + ICONS_HTML;
