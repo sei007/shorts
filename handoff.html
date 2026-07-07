@@ -254,7 +254,7 @@
   .rail-menu { position:relative; background:var(--rail-pill); border-radius:12px; padding:6px; display:flex; flex-direction:column; min-width:132px; box-shadow:0 12px 30px rgba(0,0,0,0.4); }
   .rail-menu button { display:flex; align-items:center; gap:10px; background:none; border:none; text-align:left; padding:9px 12px; border-radius:8px; color:#fff; font-family:inherit; font-weight:500; font-size:14px; }
 
-  /* overlay-in-context: the real player behind, dimmed, the highlighted overlay on top */
+  /* element-in-context: the real player behind, dimmed only as a viewing aid, the element on top */
   .octx { position:relative; overflow:hidden; background:var(--bg); }
   .octx .player { pointer-events:none; }
   .octx-scrim { position:absolute; inset:0; background:#000; opacity:.55; z-index:5; pointer-events:none; }
@@ -609,14 +609,14 @@
     { id:'a2', n:'02', title:'«Klipp från er» · entry · mobile', spec:'A2', build:buildA2, spacing:spA2, cap:'frame 410×504 · cards 260×324 r12 · gap 12 · left 19 · title Greed Medium 28 · names Greed Medium 24' },
     { id:'b1', n:'03', title:'Shorts player · desktop', spec:'B1', build:buildB1, spacing:spB1, dark:true, side:true, link:{href:'index-v2.html', label:'Open live player ↗'}, note:'Frozen 1:1 with index-v2 at 1440×1024. The video is responsive (not a set size) — it scales with the viewport and stays centred with a constant 51px gap above/below; see the Video spec. The Widforss nav is static (specced in the Shop-in-Shop handoff). Poster still stands in for the playing clip.', cap:'header 67 → video 51 gap · video 574:1021 · info left 62' },
     { id:'b2', n:'04', title:'Shorts player · mobile', spec:'B2', build:buildB2, spacing:spB2, dark:true, side:true, link:{href:'index-v2.html?view=mobile', label:'Open live player ↗'}, cap:'full-bleed video · info bottom 56 · left 20 · rail right 14' },
-    { id:'c1', n:'05', title:'Overlay · single-product card', spec:'C1', build:buildC1, inspectBuild:octxCard, spacing:spC1, side:true, cap:'in context · everything else blurred · card 330×150 r12 · thumb 90×115' },
-    { id:'c2', n:'06', title:'Overlay · “Shop the products” panel', spec:'C2', build:buildC2, inspectBuild:octxPanel, spacing:spC2, side:true, cap:'in context · everything else blurred · cards 302×94 r12 · gap 16' },
-    { id:'c3', n:'07', title:'Overlay · context menu', spec:'C3', build:buildC3, inspectBuild:octxMenu, spacing:spC3, dark:true, side:true, cap:'opens from the ⋯ · Lagre / Del' }
+    { id:'c1', n:'05', title:'Single-product card', spec:'C1', build:buildC1, inspectBuild:octxCard, spacing:spC1, side:true, note:'The surroundings are dimmed only so the card is easy to read here — that dim is a viewing aid for this handoff, not part of the design. The card itself just appears over the video; it does not blur the background.', cap:'shown over the player · card 330×150 r12 · thumb 90×115' },
+    { id:'c2', n:'06', title:'“Shop the products” panel', spec:'C2', build:buildC2, inspectBuild:octxPanel, spacing:spC2, side:true, note:'The full-screen dim is only to isolate the panel for this handoff — not part of the design. The panel does blur what is directly behind it (backdrop-blur 20px); that part is real — see its spec.', cap:'shown over the player · cards 302×94 r12 · gap 16' },
+    { id:'c3', n:'07', title:'Context menu', spec:'C3', build:buildC3, inspectBuild:octxMenu, spacing:spC3, dark:true, side:true, note:'The dim is only to isolate the menu here — a viewing aid, not part of the design. It opens as a small popover from the ⋯.', cap:'opens from the ⋯ · Lagre / Del' }
   ];
   const SECTIONS = [
     { h:'Entry module', ids:['a1','a2'] },
     { h:'Shorts player', ids:['b1','b2'] },
-    { h:'Overlays', ids:['c1','c2','c3'] }
+    { h:'Product & shop UI', ids:['c1','c2','c3'] }
   ];
   const byId = {}; SCREENS.forEach(s=>byId[s.id]=s);
 
@@ -677,7 +677,7 @@
       ['Dismiss card (×) — mobile','info column slides DOWN','bottom 234→56 · 0.50s expo-out','title sits 28px above the card; drops to 56px above the controls once dismissed'],
       ['Mute toggle','swaps sound ⇄ muted icon','instant · on .muted','feed starts muted']
     ]],
-    ['Overlays', [
+    ['Product & shop UI', [
       ['“Shop the products” panel','slides up — translateY(100% → 0)','0.55s · expo-out','video nudges up 48px (mobile 40); scrim → .55 · 0.45s'],
       ['Shop-panel cards','fadeUp','0.50s · expo-out','stagger .18 / .26 / .34 / .42s'],
       ['Context menu (⋯)','translateX(8)+scale(.96) → 0/1','0.20s · expo-out','origin right center; outside-click closes']
